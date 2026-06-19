@@ -168,9 +168,9 @@ const TEMPLATE = [
     { key:'handover_2', label:'Vyplnit 2. stranu předávacího protokolu', offset:1 },
   ]},
   { phase: 'Platby po svatbě', items: [
-    { key:'pay_final_invoice', label:'Pošli finální vyúčtování', offset:1, hasNote:true },
+    { key:'pay_final_invoice', label:'Pošli finální vyúčtování', offset:1, hasNote:true, emailType:'final_invoice' },
     { key:'pay_rent', label:'Doplatek pronájmu dle smlouvy', offset:1,
-      link:'https://dohnaluvmlyn.cz/qr/', linkLabel:'QR generátor plateb' },
+      link:'https://www.dohnaluvmlyn.cz/qr/', linkLabel:'QR generátor plateb' },
     { key:'pay_coffee', label:'Úhrada kávy', offset:1, hasNote:true },
     { key:'pay_caravan', label:'Úhrada pronájmu maringotky', offset:1, hasNote:true },
     { key:'pay_cart_bar', label:'Úhrada baru z koňského povozu', offset:1, hasNote:true },
@@ -180,8 +180,6 @@ const TEMPLATE = [
   { phase: 'Závěr', items: [
     { key:'thank_you', label:'Zaslat děkovný e-mail + dotazník zpětné vazby + žádost o fotky a Google recenzi', offset:2,
       detail:'Šablona e-mailu je v interním manuálu — zkopírovat, doplnit jméno.' },
-    { key:'financial_summary', label:'Odeslat soupis služeb a doplatků páru', offset:1,
-      detail:'Generuje se v záložce Finance v detailu svatby.' },
   ]},
 ];
 
@@ -469,6 +467,36 @@ function buildPreliminaryCalcEmailBody(w){
   return parts.join('\n\n');
 }
 
+function buildFinalInvoiceEmailBody(w){
+  const parts = [];
+  parts.push('Dobrý den,\n\nv příloze/níže Vám zasílám finální vyúčtování svatby.');
+
+  // Obsluha from shifts - exact amount
+  if(w.finance.shifts.length > 0){
+    const s = w.finance.shifts[0];
+    const people = s.people || 0;
+    const hours = s.hours || 0;
+    const rate = s.rate || 250;
+    const amount = people * hours * rate;
+    parts.push(`Obsluha\n\n${people} ${people === 1 ? 'osoba' : people < 5 ? 'osoby' : 'osob'}\nhodinová sazba ${rate} Kč/osoba\ncelkem ${kc(amount)}`);
+  }
+
+  // Flat items
+  w.finance.flatItems.forEach(f => {
+    const rawLabel = f.label || '';
+    const sectionName = CALC_LABEL_MAP[rawLabel] || rawLabel;
+    if(rawLabel.toLowerCase().includes('catering')){
+      parts.push('Catering\n\nfinální kalkulace Vám byla zaslána paní Válkovou');
+    } else {
+      const amtStr = (f.amount !== null && f.amount !== undefined) ? kc(f.amount) : '[částka]';
+      parts.push(`${sectionName}\n\n${amtStr}`);
+    }
+  });
+
+  parts.push(`Hezký den,\n${settings.signature}`);
+  return parts.join('\n\n');
+}
+
 function buildMessageText(w){
   const lines = [];
   lines.push(`Soupis služeb a doplatků — ${w.coupleName} (${fmt(new Date(w.date))})`);
@@ -656,6 +684,23 @@ function renderChecklistTab(w){
       const state = w.items[item.key];
       const status = itemStatus(w, item);
       const badgeClass = status === 'late' ? 'late' : status === 'soon' ? 'soon' : status === 'done' ? 'done' : 'neutral';
+      const finalInvoiceBlock = item.emailType === 'final_invoice' ? (() => {
+        const body = buildFinalInvoiceEmailBody(w);
+        const subject = `Finální vyúčtování — ${w.coupleName}`;
+        const canSend = !!w.contactEmail;
+        const mailHref = canSend
+          ? `mailto:${encodeURIComponent(w.contactEmail)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+          : '';
+        return `
+        <div class="send-row" style="margin-top:6px;">
+          ${canSend
+            ? `<a href="${mailHref}" class="btn-link">Odeslat e-mailem</a>`
+            : `<button class="small" disabled>Odeslat e-mailem</button><span class="note-small" style="margin:0;">Chybí e-mail páru (záložka Info &amp; lidé)</span>`}
+          ${canSend && gmailConnected()
+            ? `<button class="small" data-action="send-gmail-final-invoice">Odeslat přes Gmail</button>`
+            : ''}
+        </div>`;
+      })() : '';
       const calcEmailBlock = item.emailType === 'calculation' ? (() => {
         const body = buildPreliminaryCalcEmailBody(w);
         const subject = `Předběžná kalkulace — ${w.coupleName}`;
@@ -702,6 +747,7 @@ function renderChecklistTab(w){
           ${item.link ? `<a class="item-link" href="${item.link}" target="_blank" rel="noopener">${escapeHtml(item.linkLabel || 'Odkaz')} ↗</a>` : ''}
           <div class="item-due"><span class="badge ${badgeClass}">${badgeText(w, item, status)}</span></div>
           ${item.hasNote ? `<div class="item-note"><input type="text" placeholder="Poznámka…" value="${escapeHtml(state.note)}" data-action="note-item" data-key="${item.key}"/></div>` : ''}
+          ${finalInvoiceBlock}
           ${calcEmailBlock}
           ${emailBlock}
         </div>
@@ -994,6 +1040,20 @@ async function onAction(e){
     const vars = { coupleName: w.coupleName, link: w.guestbookLink, signature: settings.signature };
     const subject = fillTemplate(item.email.subject, vars);
     const body = fillTemplate(item.email.body, vars);
+    e.currentTarget.disabled = true;
+    e.currentTarget.textContent = 'Odesílám…';
+    try{
+      await sendViaGmail(w.contactEmail, subject, body);
+      alert('E-mail byl odeslán přes Gmail.');
+    }catch(err){
+      alert('Odeslání se nezdařilo: ' + err.message);
+    }
+    render();
+    return;
+  }
+  if(action === 'send-gmail-final-invoice'){
+    const subject = `Finální vyúčtování — ${w.coupleName}`;
+    const body = buildFinalInvoiceEmailBody(w);
     e.currentTarget.disabled = true;
     e.currentTarget.textContent = 'Odesílám…';
     try{
