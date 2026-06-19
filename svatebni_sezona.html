@@ -135,51 +135,40 @@ const COORDINATORS = ['', 'Honza + Verča', 'Matěj', 'Grochy', 'Eliška a Vojta
 const TEMPLATE = [
   { phase: 'Před svatbou', items: [
     { key:'guestbook', label:'Odeslat odkaz na knihu hostů', offset:-7, hasNote:true,
-      detail:'Zákonná evidence hostů přespávajících na mlýně. Vytvořit vlastní kopii odkazu (nesdílet citlivé údaje mezi svatbami), archivace 6 let.',
       link:'https://docs.google.com/spreadsheets/d/1v64izE_OHMODxrOPPFsD-QrYPIxD6YIYhuyXJpxr3sQ/copy', linkLabel:'Šablona knihy hostů',
       email:{
         subject:'Kniha hostů – {coupleName}',
         body:'Dobrý den,\n\nníže posíláme knihu hostů, prosíme vás o včasné vyplnění.\n\n{link}\n\nHezký den,\n{signature}'
       } },
-    { key:'calculation', label:'Zaslat předběžnou kalkulaci za služby', offset:-7, hasNote:true, emailType:'calculation',
-      detail:'Doplatek pronájmu, obsluha, příp. maringotka / koňský povoz / úklid, catering. Potvrdit e-mailem, ať pár není den po svatbě překvapen.' },
-    { key:'tarps', label:'Potvrdit plachty Vojtovi / Grochymu', offset:-2,
-      detail:'Zjistit od páru, jak chtějí mít plachty, a poslat dál nejpozději 48 h před svatbou.' },
-    { key:'deposit_collect', label:'Vybrat vratnou kauci 5 000 Kč (hotově)', offset:0, hasNote:true,
-      detail:'50 Kč za rozbitý kus nádobí se odečítá z kauce — poškození nahlásí pár sám.' },
+    { key:'calculation', label:'Zaslat předběžnou kalkulaci za služby', offset:-7, hasNote:true, emailType:'calculation' },
+    { key:'tarps', label:'Potvrdit plachty Vojtovi / Grochymu', offset:-2 },
+    { key:'deposit_collect', label:'Vybrat vratnou kauci 5 000 Kč (hotově)', offset:0, hasNote:true },
   ]},
   { phase: 'Svatební den', items: [
-    { key:'arrival', label:'Příjezd min. 30 minut před svatebčany', offset:0,
-      detail:'Nespoléhat na to, že je na místě už někdo jiný (Vojta, Grochy).' },
-    { key:'venue_check', label:'Kontrola připravenosti areálu', offset:0,
-      detail:'Ubytování, koupelny, bar, nádobí, zázemí kuchyně, další domluvené věci.' },
-    { key:'inform_couple', label:'Upozornit pár na stav prostor', offset:0,
-      detail:'Doporučit, ať si stav vyfotí před začátkem svatby.' },
+    { key:'arrival', label:'Příjezd min. 30 minut před svatebčany', offset:0 },
+    { key:'venue_check', label:'Kontrola připravenosti areálu', offset:0 },
+    { key:'inform_couple', label:'Upozornit pár na stav prostor', offset:0 },
     { key:'safety_briefing', label:'Seznámit pár s elektřinou, hasicími přístroji a provozním řádem', offset:0 },
-    { key:'handover_1', label:'Podpis předávacího protokolu (1. strana)', offset:0,
-      detail:'Protokol si kontaktní osoba uchovává, kompletace proběhne po konci sezóny.' },
+    { key:'handover_1', label:'Podpis předávacího protokolu (1. strana)', offset:0 },
   ]},
   { phase: 'Po svatbě', items: [
-    { key:'post_check', label:'Kontrola stavu areálu po svatbě', offset:1,
-      detail:'Ubytování, stodola, koupelny, bar, kuchyň, nádobí.' },
+    { key:'post_check', label:'Kontrola stavu areálu po svatbě', offset:1 },
     { key:'damage_report', label:'Nahlásit Vojtovi rozbité / poškozené vybavení', offset:1, hasNote:true },
-    { key:'deposit_return', label:'Vyúčtovat a vrátit kauci', offset:1, hasNote:true,
-      detail:'Pokud úklid nebyl dostatečný, odhadnout cenu douklízení a odečíst z kauce.' },
+    { key:'deposit_return', label:'Vyúčtovat a vrátit kauci', offset:1, hasNote:true },
     { key:'handover_2', label:'Vyplnit 2. stranu předávacího protokolu', offset:1 },
   ]},
   { phase: 'Platby po svatbě', items: [
     { key:'pay_final_invoice', label:'Pošli finální vyúčtování', offset:1, hasNote:true, emailType:'final_invoice' },
     { key:'pay_rent', label:'Doplatek pronájmu dle smlouvy', offset:1,
       link:'https://www.dohnaluvmlyn.cz/qr/', linkLabel:'QR generátor plateb' },
-    { key:'pay_coffee', label:'Úhrada kávy', offset:1, hasNote:true, qrImg:'káva.png' },
+    { key:'pay_coffee', label:'Úhrada kávy', offset:1, hasNote:true },
     { key:'pay_caravan', label:'Úhrada pronájmu maringotky', offset:1, hasNote:true },
     { key:'pay_cart_bar', label:'Úhrada baru z koňského povozu', offset:1, hasNote:true },
     { key:'pay_cleaning', label:'Úhrada závěrečného úklidu', offset:1, hasNote:true },
     { key:'pay_staff', label:'Úhrada obsluhy', offset:1, hasNote:true },
   ]},
   { phase: 'Závěr', items: [
-    { key:'thank_you', label:'Zaslat děkovný e-mail + dotazník zpětné vazby + žádost o fotky a Google recenzi', offset:2,
-      detail:'Šablona e-mailu je v interním manuálu — zkopírovat, doplnit jméno.' },
+    { key:'thank_you', label:'Zaslat děkovný e-mail + dotazník zpětné vazby + žádost o fotky a Google recenzi', offset:2 },
   ]},
 ];
 
@@ -509,6 +498,7 @@ function buildMessageText(w){
   const lines = [];
   lines.push(`Soupis služeb a doplatků — ${w.coupleName} (${fmt(new Date(w.date))})`);
   lines.push('');
+  if(w.staffPlanned) lines.push(`Obsluha: ${w.staffPlanned} ${w.staffPlanned === 1 ? 'osoba' : w.staffPlanned < 5 ? 'osoby' : 'osob'}`);
   w.finance.shifts.forEach(s => {
     const amount = (s.people||0)*(s.hours||0)*(s.rate||0);
     lines.push(`${s.label || 'Obsluha'}: ${s.people||0} × ${s.hours||0} h × ${s.rate||0} Kč = ${kc(amount)}`);
