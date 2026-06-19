@@ -726,9 +726,6 @@ function renderChecklistTab(w){
         <div class="item-body">
           <div class="item-label ${state.done?'checked':''}">${escapeHtml(item.label)}</div>
           ${item.link ? `<a class="item-link" href="${item.link}" target="_blank" rel="noopener">${escapeHtml(item.linkLabel || 'Odkaz')} ↗</a>` : ''}
-          <div class="item-due"><span class="badge ${badgeClass}">${badgeText(w, item, status)}</span></div>
-          ${item.hasNote ? `<div class="item-note"><input type="text" placeholder="Poznámka…" value="${escapeHtml(state.note)}" data-action="note-item" data-key="${item.key}"/></div>` : ''}
-          ${item.qrImg ? `<div style="margin-top:8px;"><img src="${escapeHtml(item.qrImg)}" alt="QR platba" style="width:180px;height:180px;display:block;border-radius:8px;"/></div>` : ''}
           ${finalInvoiceBlock}
           ${calcEmailBlock}
           ${emailBlock}
@@ -758,8 +755,12 @@ function renderFinanceTab(w){
   return `
     <div class="card">
       <div class="section-title">Obsluha (směny)</div>
+      ${w.serviceNames.length > 0 ? `<div class="muted" style="font-size:12px;margin-bottom:8px;">Z Info &amp; lidé: ${escapeHtml(w.serviceNames.join(', '))}</div>` : ''}
       ${shiftsRows || '<div class="muted" style="font-size:12px;margin-bottom:8px;">Žádná směna zatím nezadaná.</div>'}
-      <button class="small" data-action="fin-add-shift" style="margin-top:6px;">+ Přidat směnu</button>
+      <div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;">
+        <button class="small" data-action="fin-add-shift">+ Přidat směnu</button>
+        ${w.serviceNames.length > 0 ? `<button class="small" data-action="sync-shifts-from-info">↺ Sync z Info &amp; lidé (${w.serviceNames.length} obsluha)</button>` : ''}
+      </div>
     </div>
     <div class="card">
       <div class="section-title">Ostatní položky</div>
@@ -956,7 +957,23 @@ async function onAction(e){
   }
   if(action === 'open-wedding'){ view = { mode:'detail', weddingId:id, tab:'checklist' }; render(); return; }
   if(action === 'back-to-list'){ view = { mode:'list', weddingId:null, tab:'checklist' }; render(); return; }
-  if(action === 'set-tab'){ view.tab = e.currentTarget.getAttribute('data-tab'); render(); return; }
+  if(action === 'set-tab'){
+    view.tab = e.currentTarget.getAttribute('data-tab');
+    if(view.tab === 'finance' && w && w.finance.shifts.length === 0 && w.serviceNames.length > 0){
+      w.serviceNames.forEach((_, i) => {
+        w.finance.shifts.push({ label: `Obsluha ${i+1}`, people: 1, hours: 8, rate: 250 });
+      });
+      persist();
+    }
+    render(); return;
+  }
+  if(action === 'sync-shifts-from-info'){
+    if(!w || !w.serviceNames.length) return;
+    w.finance.shifts = w.serviceNames.map((_, i) => ({
+      label: `Obsluha ${i+1}`, people: 1, hours: 8, rate: 250
+    }));
+    persist(); render(); return;
+  }
   if(action === 'delete-wedding'){
     e.stopPropagation();
     if(confirm('Smazat tuto svatbu a celý její checklist?')){
