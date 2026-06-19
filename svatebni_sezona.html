@@ -141,7 +141,7 @@ const TEMPLATE = [
         subject:'Kniha hostů – {coupleName}',
         body:'Dobrý den,\n\nníže posíláme knihu hostů, prosíme vás o včasné vyplnění.\n\n{link}\n\nHezký den,\n{signature}'
       } },
-    { key:'calculation', label:'Zaslat finální kalkulaci', offset:-7, hasNote:true,
+    { key:'calculation', label:'Zaslat předběžnou kalkulaci za služby', offset:-7, hasNote:true, emailType:'calculation',
       detail:'Doplatek pronájmu, obsluha, příp. maringotka / koňský povoz / úklid, catering. Potvrdit e-mailem, ať pár není den po svatbě překvapen.' },
     { key:'tarps', label:'Potvrdit plachty Vojtovi / Grochymu', offset:-2,
       detail:'Zjistit od páru, jak chtějí mít plachty, a poslat dál nejpozději 48 h před svatbou.' },
@@ -191,70 +191,19 @@ const ALL_ITEMS = TEMPLATE.flatMap(p => p.items.map(i => ({...i, phase:p.phase})
 const FLAT_TEMPLATES = ['Úklid paušál','Maringotka','Doplatek nájem','Catering','Káva','Pivo + Kofola','Koňský povoz'];
 
 const SEED_WEDDINGS = [
-  {date:'2026-04-18',day:'Sobota',coord:'Honza + Verča',staff:5,guests:100,service:['Lenka Helísková','Jan Kenša','Monika Kenša','Petra Pospíšilová'],cleaning:['Monika Kenša','Petra Grochalová','Petra Pospíšilová','Lenka Helísková','Lucka Dohnalová']},
   {date:'2026-04-25',day:'Sobota',coord:'Matěj',staff:4,guests:60,service:['Matěj Dohnal','Petra Pospíšilová','Tereza Puršová','Lenka Helísková'],cleaning:['Petra Grochalová','Petra Pospíšilová','Kamča Zavadilová','Lenka Helísková','Monika Kenša']},
-  {date:'2026-05-02',day:'Sobota',coord:'Honza + Verča',staff:null,guests:60,service:[],cleaning:['Monika Kenša','Lenka Helísková']},
-  {date:'2026-05-07',day:'Čtvrtek',coord:'Grochy',staff:null,guests:30,service:['Tomáš Grochal','Monika Kenša','Lenka Helísková'],cleaning:['Monika Kenša','Petra Grochalová','Kamča Zavadilová','Lenka Helísková','Lucka Dohnalová']},
-  {date:'2026-05-09',day:'Sobota',coord:'Grochy',staff:null,guests:80,service:['Monika Kenša','Jan Kenša','Lenka Helísková','Kamča Zavadilová'],cleaning:['Petra Pospíšilová','Lenka Helísková','Lucka Dohnalová']},
   {date:'2026-05-14',day:'Čtvrtek',coord:'Matěj',staff:4,guests:65,service:['Monika Kenša','Tereza Puršová','Tomáš Grochal','Petra Pospíšilová'],cleaning:['Petra Grochalová','Kamča Zavadilová','Tereza Puršová']},
   {date:'2026-05-16',day:'Sobota',coord:'Matěj',staff:3,guests:50,service:['Monika Kenša','Jan Kenša','Tomáš Grochal','Petra Grochalová','Petra Pospíšilová'],cleaning:['Petra Pospíšilová','Lucka Dohnalová','Monika Kenša']},
-  {date:'2026-05-21',day:'Čtvrtek',coord:'Eliška a Vojta',staff:null,guests:70,service:[],cleaning:['Monika Kenša','Tereza Puršová']},
-  {date:'2026-05-23',day:'Sobota',coord:'Eliška a Vojta',staff:null,guests:90,service:['Tereza Puršová'],cleaning:['Petra Pospíšilová','Tereza Puršová']},
-  {date:'2026-05-28',day:'Čtvrtek',coord:'Honza + Verča',staff:null,guests:30,service:['Tomáš Grochal'],cleaning:['Monika Kenša','Lucka Dohnalová']},
-  {date:'2026-05-30',day:'Sobota',coord:'Honza + Verča',staff:null,guests:45,service:['Tomáš Grochal'],cleaning:['Monika Kenša','Lucka Dohnalová','Petra Pospíšilová']},
-  {date:'2026-06-04',day:'Čtvrtek',coord:'Grochy',staff:null,guests:80,service:['Tomáš Grochal','Monika Kenša'],cleaning:['Petra Grochalová','Kamča Zavadilová']},
-  {date:'2026-06-06',day:'Sobota',coord:'Grochy',staff:null,guests:80,service:['Monika Kenša','Jan Kenša'],cleaning:['Monika Kenša','Tereza Puršová','Petra Pospíšilová']},
   {date:'2026-06-11',day:'Čtvrtek',coord:'Matěj',staff:null,guests:null,service:['Monika Kenša','Tereza Puršová','Tomáš Grochal'],cleaning:['Tereza Puršová']},
   {date:'2026-06-13',day:'Sobota',coord:'Matěj',staff:5,guests:90,service:['Monika Kenša','Jan Kenša','Tomáš Grochal','Petra Grochalová','Petra Pospíšilová'],cleaning:['Tereza Puršová','Petra Pospíšilová']},
-  {date:'2026-06-18',day:'Čtvrtek',coord:'Eliška a Vojta',staff:null,guests:60,service:['Tomáš Grochal'],cleaning:['Monika Kenša']},
-  {date:'2026-06-20',day:'Sobota',coord:'Eliška a Vojta',staff:null,guests:50,service:[],cleaning:['Monika Kenša']},
-  {date:'2026-06-25',day:'Čtvrtek',coord:'Honza + Verča',staff:null,guests:80,service:['Tomáš Grochal'],cleaning:['Monika Kenša']},
-  {date:'2026-06-27',day:'Sobota',coord:'Honza + Verča',staff:null,guests:null,service:[],cleaning:['Monika Kenša']},
-  {date:'2026-07-02',day:'Čtvrtek',coord:'Honza + Verča',staff:null,guests:80,service:['Tomáš Grochal'],cleaning:['Monika Kenša']},
-  {date:'2026-07-04',day:'Sobota',coord:'Honza + Verča',staff:null,guests:70,service:['Jan Kenša','Monika Kenša','Petra Pospíšilová'],cleaning:[]},
-  {date:'2026-07-09',day:'Čtvrtek',coord:'Grochy',staff:null,guests:45,service:['Monika Kenša','Jan Kenša'],cleaning:['Monika Kenša']},
-  {date:'2026-07-11',day:'Sobota',coord:'Grochy',staff:null,guests:80,service:['Monika Kenša','Jan Kenša','Kamča Zavadilová'],cleaning:['Monika Kenša']},
-  {date:'2026-07-16',day:'Čtvrtek',coord:'Eliška a Vojta',staff:null,guests:85,service:[],cleaning:['Monika Kenša']},
-  {date:'2026-07-18',day:'Sobota',coord:'Eliška a Vojta',staff:null,guests:60,service:[],cleaning:['Monika Kenša','Petra Pospíšilová']},
   {date:'2026-07-23',day:'Čtvrtek',coord:'Matěj',staff:5,guests:75,service:['Tomáš Grochal','Petra Pospíšilová','Monika Kenša','Jan Kenša'],cleaning:['Tereza Puršová']},
   {date:'2026-07-25',day:'Sobota',coord:'Matěj',staff:3,guests:50,service:['Monika Kenša','Jan Kenša','Tereza Puršová','Tomáš Grochal','Petra Pospíšilová'],cleaning:['Petra Pospíšilová']},
-  {date:'2026-07-30',day:'Čtvrtek',coord:'Honza + Verča',staff:null,guests:60,service:['Tomáš Grochal'],cleaning:[]},
-  {date:'2026-08-01',day:'Sobota',coord:'Honza + Verča',staff:null,guests:80,service:[],cleaning:[]},
-  {date:'2026-08-06',day:'Čtvrtek',coord:'Eliška a Vojta',staff:null,guests:45,service:[],cleaning:['Monika Kenša']},
-  {date:'2026-08-08',day:'Sobota',coord:'Eliška a Vojta',staff:null,guests:65,service:[],cleaning:['Monika Kenša']},
   {date:'2026-08-13',day:'Čtvrtek',coord:'Matěj',staff:3,guests:30,service:['Monika Kenša','Jan Kenša','Tomáš Grochal','Petra Pospíšilová'],cleaning:[]},
   {date:'2026-08-15',day:'Sobota',coord:'Matěj',staff:null,guests:null,service:['Monika Kenša','Jan Kenša','Petra Pospíšilová'],cleaning:[]},
   {date:'2026-08-20',day:'Čtvrtek',coord:'Matěj',staff:null,guests:70,service:['Monika Kenša','Jan Kenša','Petra Pospíšilová'],cleaning:[]},
   {date:'2026-08-22',day:'Sobota',coord:'Matěj',staff:2,guests:60,service:['Petra Pospíšilová','Monika Kenša','Jan Kenša'],cleaning:[]},
-  {date:'2026-08-27',day:'Čtvrtek',coord:'Grochy',staff:null,guests:70,service:[],cleaning:[]},
-  {date:'2026-08-29',day:'Sobota',coord:'Grochy',staff:null,guests:70,service:['Tomáš Grochal','Monika Kenša','Jan Kenša'],cleaning:[]},
-  {date:'2026-09-03',day:'Čtvrtek',coord:'Grochy',staff:null,guests:70,service:[],cleaning:[]},
-  {date:'2026-09-05',day:'Sobota',coord:null,staff:null,guests:null,service:[],cleaning:[]},
   {date:'2026-09-10',day:'Čtvrtek',coord:'Matěj',staff:3,guests:null,service:['Tomáš Grochal'],cleaning:[]},
   {date:'2026-09-12',day:'Sobota',coord:'Matěj',staff:3,guests:null,service:['Monika Kenša','Jan Kenša','Tomáš Grochal','Petra Grochalová'],cleaning:[]},
-  {date:'2026-09-17',day:'Čtvrtek',coord:'Honza + Verča',staff:null,guests:65,service:['Tomáš Grochal'],cleaning:[]},
-  {date:'2026-09-19',day:'Sobota',coord:'Honza + Verča',staff:null,guests:80,service:[],cleaning:[]},
-  {date:'2026-09-24',day:'Čtvrtek',coord:'Grochy',staff:null,guests:60,service:['Tomáš Grochal'],cleaning:[]},
-  {date:'2026-09-26',day:'Sobota',coord:'Grochy',staff:null,guests:65,service:['Tomáš Grochal','Monika Kenša','Jan Kenša'],cleaning:[]},
-  {date:'2026-10-01',day:'Čtvrtek',coord:'Grochy',staff:null,guests:70,service:['Tomáš Grochal'],cleaning:[]},
-  {date:'2026-10-03',day:'Sobota',coord:'Grochy',staff:null,guests:80,service:['Tomáš Grochal','Jan Kenša','Monika Kenša'],cleaning:[]},
-  {date:'2026-10-10',day:'Sobota',coord:'Eliška a Vojta',staff:null,guests:50,service:[],cleaning:[]},
-  {date:'2027-05-15',day:'Sobota',coord:null,staff:null,guests:90,service:[],cleaning:[]},
-  {date:'2027-05-29',day:'Sobota',coord:null,staff:null,guests:50,service:[],cleaning:[]},
-  {date:'2027-06-05',day:'Sobota',coord:null,staff:null,guests:60,service:[],cleaning:[]},
-  {date:'2027-06-19',day:'Sobota',coord:null,staff:null,guests:80,service:[],cleaning:[]},
-  {date:'2027-06-26',day:'Sobota',coord:null,staff:null,guests:60,service:[],cleaning:[]},
-  {date:'2027-07-03',day:'Sobota',coord:null,staff:null,guests:80,service:[],cleaning:[]},
-  {date:'2027-07-08',day:'Čtvrtek',coord:null,staff:null,guests:70,service:[],cleaning:[]},
-  {date:'2027-07-10',day:'Sobota',coord:null,staff:null,guests:75,service:[],cleaning:[]},
-  {date:'2027-07-17',day:'Sobota',coord:null,staff:null,guests:100,service:[],cleaning:[]},
-  {date:'2027-07-24',day:'Sobota',coord:null,staff:null,guests:50,service:[],cleaning:[]},
-  {date:'2027-07-31',day:'Sobota',coord:null,staff:null,guests:70,service:[],cleaning:[]},
-  {date:'2027-08-12',day:'Čtvrtek',coord:null,staff:null,guests:90,service:[],cleaning:[]},
-  {date:'2027-08-21',day:'Sobota',coord:null,staff:null,guests:60,service:[],cleaning:[]},
-  {date:'2027-09-04',day:'Sobota',coord:null,staff:null,guests:90,service:[],cleaning:[]},
-  {date:'2027-09-11',day:'Sobota',coord:null,staff:null,guests:50,service:[],cleaning:[]},
-  {date:'2027-09-18',day:'Sobota',coord:null,staff:null,guests:105,service:[],cleaning:[]},
 ];
 
 const SEED_NAMES = {
@@ -307,7 +256,7 @@ function importSeedWeddings(){
 
 let weddings = [];
 let view = { mode:'list', weddingId:null, tab:'checklist' };
-let coordFilter = '';
+let coordFilter = 'Matěj';
 let upcomingOnly = false;
 let modal = null;
 
@@ -355,6 +304,7 @@ async function load(){
   }catch(e){
     weddings = [];
   }
+  if(weddings.length === 0) importSeedWeddings();
   try{
     const res2 = await window.storage.get(SETTINGS_KEY, false);
     if(res2 && res2.value) settings = { ...settings, ...JSON.parse(res2.value) };
@@ -483,6 +433,41 @@ function financeTotal(w){
   const shiftsTotal = w.finance.shifts.reduce((s,x) => s + (x.people||0)*(x.hours||0)*(x.rate||0), 0);
   const flatTotal = w.finance.flatItems.reduce((s,x) => s + (x.amount||0), 0);
   return shiftsTotal + flatTotal;
+}
+
+const CALC_LABEL_MAP = {
+  'Úklid paušál': 'Úklid baru',
+  'Doplatek nájem': 'Doplatek nájmu',
+  'Koňský povoz': 'Koňský bar',
+};
+
+function buildPreliminaryCalcEmailBody(w){
+  const parts = [];
+  parts.push('Dobrý den,\n\nv příloze/níže Vám zasílám předběžnou kalkulaci svatby.');
+
+  // Obsluha from shifts
+  if(w.finance.shifts.length > 0){
+    const s = w.finance.shifts[0];
+    const people = s.people || 4;
+    const rate = s.rate || 250;
+    parts.push(`Obsluha\n\n${people} ${people === 1 ? 'osoba' : people < 5 ? 'osoby' : 'osob'}\nhodinová sazba ${rate} Kč/osoba\nfinální částka bude vyúčtována dle skutečně odpracovaných hodin`);
+  }
+
+  // Flat items
+  w.finance.flatItems.forEach(f => {
+    const rawLabel = f.label || '';
+    const sectionName = CALC_LABEL_MAP[rawLabel] || rawLabel;
+    if(rawLabel.toLowerCase().includes('catering')){
+      parts.push('Catering\n\nfinální kalkulace Vám byla zaslána paní Válkovou');
+    } else {
+      const amtStr = (f.amount !== null && f.amount !== undefined) ? kc(f.amount) : '[částka]';
+      parts.push(`${sectionName}\n\n${amtStr}`);
+    }
+  });
+
+  parts.push('Jedná se o předběžnou kalkulaci. Konečné vyúčtování bude upřesněno po akci dle skutečně poskytnutých služeb a odpracovaných hodin.');
+  parts.push(`Hezký den,\n${settings.signature}`);
+  return parts.join('\n\n');
 }
 
 function buildMessageText(w){
@@ -672,6 +657,29 @@ function renderChecklistTab(w){
       const state = w.items[item.key];
       const status = itemStatus(w, item);
       const badgeClass = status === 'late' ? 'late' : status === 'soon' ? 'soon' : status === 'done' ? 'done' : 'neutral';
+      const calcEmailBlock = item.emailType === 'calculation' ? (() => {
+        const body = buildPreliminaryCalcEmailBody(w);
+        const subject = `Předběžná kalkulace — ${w.coupleName}`;
+        const canSend = !!w.contactEmail;
+        const mailHref = canSend
+          ? `mailto:${encodeURIComponent(w.contactEmail)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+          : '';
+        const noFinance = w.finance.shifts.length === 0 && w.finance.flatItems.length === 0;
+        return `
+        <div class="item-note" style="margin-top:8px;">
+          ${noFinance ? `<div class="note-small" style="margin-bottom:6px;">⚠ Záložka Finance je prázdná — doplň směny a položky, pak se e-mail sestaví automaticky.</div>` : ''}
+          <label>Náhled e-mailu (upravitelný)</label>
+          <textarea id="calc-email-body" style="width:100%;min-height:240px;font-family:'JetBrains Mono',monospace;font-size:12px;white-space:pre-wrap;resize:vertical;">${escapeHtml(body)}</textarea>
+        </div>
+        <div class="send-row" style="margin-top:6px;">
+          ${canSend
+            ? `<a href="${mailHref}" class="btn-link">Otevřít e-mail</a>`
+            : `<button class="small" disabled>Otevřít e-mail</button><span class="note-small" style="margin:0;">Chybí e-mail páru (záložka Info &amp; lidé)</span>`}
+          ${canSend && gmailConnected()
+            ? `<button class="small" data-action="send-gmail-calc">Odeslat přes Gmail</button>`
+            : ''}
+        </div>`;
+      })() : '';
       const emailBlock = item.email ? (() => {
         const canSend = w.contactEmail && w.guestbookLink;
         const vars = { coupleName: w.coupleName, link: w.guestbookLink, signature: settings.signature };
@@ -701,6 +709,7 @@ function renderChecklistTab(w){
           ${item.link ? `<a class="item-link" href="${item.link}" target="_blank" rel="noopener">${escapeHtml(item.linkLabel || 'Odkaz')} ↗</a>` : ''}
           <div class="item-due"><span class="badge ${badgeClass}">${badgeText(w, item, status)}</span></div>
           ${item.hasNote ? `<div class="item-note"><input type="text" placeholder="Poznámka…" value="${escapeHtml(state.note)}" data-action="note-item" data-key="${item.key}"/></div>` : ''}
+          ${calcEmailBlock}
           ${emailBlock}
         </div>
       </div>`;
@@ -992,6 +1001,21 @@ async function onAction(e){
     const vars = { coupleName: w.coupleName, link: w.guestbookLink, signature: settings.signature };
     const subject = fillTemplate(item.email.subject, vars);
     const body = fillTemplate(item.email.body, vars);
+    e.currentTarget.disabled = true;
+    e.currentTarget.textContent = 'Odesílám…';
+    try{
+      await sendViaGmail(w.contactEmail, subject, body);
+      alert('E-mail byl odeslán přes Gmail.');
+    }catch(err){
+      alert('Odeslání se nezdařilo: ' + err.message);
+    }
+    render();
+    return;
+  }
+  if(action === 'send-gmail-calc'){
+    const subject = `Předběžná kalkulace — ${w.coupleName}`;
+    const ta = document.getElementById('calc-email-body');
+    const body = ta ? ta.value : buildPreliminaryCalcEmailBody(w);
     e.currentTarget.disabled = true;
     e.currentTarget.textContent = 'Odesílám…';
     try{
