@@ -168,7 +168,7 @@ const TEMPLATE = [
     { key:'pay_staff', label:'Úhrada obsluhy', offset:1, hasNote:true },
   ]},
   { phase: 'Závěr', items: [
-    { key:'thank_you', label:'Zaslat děkovný e-mail + dotazník zpětné vazby + žádost o fotky a Google recenzi', offset:2 },
+    { key:'thank_you', label:'Zaslat děkovný e-mail + dotazník zpětné vazby + žádost o fotky a Google recenzi', offset:2, emailType:'thank_you' },
   ]},
 ];
 
@@ -494,6 +494,27 @@ function buildFinalInvoiceEmailBody(w){
   return parts.join('\n\n');
 }
 
+function buildThankYouEmailBody(w){
+  return `Dobrý den,
+
+rádi bychom vám ještě jednou ze srdce poděkovali za to, že jste si pro svůj velký den vybrali právě naše místo. Velmi si vážíme vaší důvěry a jsme rádi, že jsme mohli být součástí tak výjimečné události. Doufáme, že jste si svatbu naplno užili a že na ni budete vzpomínat s radostí ještě dlouhá léta.
+
+Rádi bychom vás zároveň poprosili o krátké vyplnění dotazníku zpětné vazby. Vaše zkušenost je pro nás nesmírně důležitá a pomáhá nám zlepšovat naše služby a posouvat celý zážitek zase o krok dál.
+
+https://docs.google.com/forms/d/1hZ4_H00y8w0fvSbcCnLqMjh9TvKMNtP0Wg_mHRgm_G8/preview
+
+Pokud byste měli chuť, budeme moc rádi i za poskytnutí pár fotografií ze svatby. Nemusí jít o nic osobního – klidně jen detaily, výzdoba nebo atmosféra místa. Samozřejmě je to zcela dobrovolné a pochopíme, pokud se rozhodnete fotky nesdílet.
+
+A pokud byste si našli ještě chvilku navíc, velmi by nám pomohlo i krátké hodnocení na Google. Vaše doporučení může usnadnit rozhodování dalším párům, které hledají své vysněné svatební místo a pro nás má taková zpětná vazba opravdu velkou hodnotu.
+
+https://www.google.com/search?sa=X&sca_esv=7f063fa5aeb92d1e&rlz=1C5CHEA_enCZ1058CZ1058&sxsrf=ANbL-n77IzKrpI46ECvt8EkVyN_OZNiBsQ:17764999333351&q=Dohnal%C5%AFv+ml%C3%BDn+Recenze&rlfg=1&num=20&stick=H4sIAAAAAAAAAONgkxIxNDyxNzEyMDYxMzSxtDA0NzA0NrAyPiKUdwlPyMvMefo-iKF33zDe_MUqIKTU_OqUhex4pIBAKUOxQZPAAAA&ldimm=13474203461498170172&tbm=lcl&hl=cs-CZ&ved=2ahUKEwj98uH7-faTAxVf5AIHHQn8BrcQ9fQKeqQINRAG&biw=1440&bih=666&dpr=2#lkt=LocalPoiReviews
+
+Ještě jednou děkujeme a přejeme vám do společného života spoustu lásky, radosti a krásných společných okamžiků.
+
+S pozdravem
+${settings.signature}`;
+}
+
 function buildMessageText(w){
   const lines = [];
   lines.push(`Soupis služeb a doplatků — ${w.coupleName} (${fmt(new Date(w.date))})`);
@@ -685,6 +706,23 @@ function renderChecklistTab(w){
             : ''}
         </div>`;
       })() : '';
+      const thankYouEmailBlock = item.emailType === 'thank_you' ? (() => {
+        const body = buildThankYouEmailBody(w);
+        const subject = `Děkujeme za vaši svatbu na Dohnalově mlýně`;
+        const canSend = !!w.contactEmail;
+        const mailHref = canSend
+          ? `mailto:${encodeURIComponent(w.contactEmail)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+          : '';
+        return `
+        <div class="send-row" style="margin-top:6px;">
+          ${canSend
+            ? `<a href="${mailHref}" class="btn-link">Odeslat e-mailem</a>`
+            : `<button class="small" disabled>Odeslat e-mailem</button><span class="note-small" style="margin:0;">Chybí e-mail páru (záložka Info &amp; lidé)</span>`}
+          ${canSend && gmailConnected()
+            ? `<button class="small" data-action="send-gmail-thank-you">Odeslat přes Gmail</button>`
+            : ''}
+        </div>`;
+      })() : '';
       const calcEmailBlock = item.emailType === 'calculation' ? (() => {
         const body = buildPreliminaryCalcEmailBody(w);
         const subject = `Předběžná kalkulace — ${w.coupleName}`;
@@ -730,6 +768,7 @@ function renderChecklistTab(w){
           ${item.link ? `<a class="item-link" href="${item.link}" target="_blank" rel="noopener">${escapeHtml(item.linkLabel || 'Odkaz')} ↗</a>` : ''}
           ${finalInvoiceBlock}
           ${calcEmailBlock}
+          ${thankYouEmailBlock}
           ${emailBlock}
         </div>
       </div>`;
@@ -1070,6 +1109,20 @@ async function onAction(e){
     const subject = `Předběžná kalkulace — ${w.coupleName}`;
     const ta = document.getElementById('calc-email-body');
     const body = ta ? ta.value : buildPreliminaryCalcEmailBody(w);
+    e.currentTarget.disabled = true;
+    e.currentTarget.textContent = 'Odesílám…';
+    try{
+      await sendViaGmail(w.contactEmail, subject, body);
+      alert('E-mail byl odeslán přes Gmail.');
+    }catch(err){
+      alert('Odeslání se nezdařilo: ' + err.message);
+    }
+    render();
+    return;
+  }
+  if(action === 'send-gmail-thank-you'){
+    const subject = `Děkujeme za vaši svatbu na Dohnalově mlýně`;
+    const body = buildThankYouEmailBody(w);
     e.currentTarget.disabled = true;
     e.currentTarget.textContent = 'Odesílám…';
     try{
