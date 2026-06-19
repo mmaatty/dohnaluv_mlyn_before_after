@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<title>Svatební sezóna — Dohnalův mlýn</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root{
+  --bg: #211d19;
+  --panel: #2b2521;
+  --panel-2: #332c27;
+  --line: #463c34;
+  --paper: #ece4d4;
+  --paper-dim: #b9ab95;
+  --water: #6fa3bd;
+  --water-dim: #3f5e6c;
+  --wheat: #d6a541;
+  --wheat-dim: #8a6c2c;
+  --red: #c5634f;
+  --green: #7a9b5e;
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--paper);font-family:'Inter',sans-serif;font-size:14px;line-height:1.5;}
+.wrap{max-width:780px;margin:0 auto;padding:28px 20px 60px;}
+.brand{font-family:'Fraunces',serif;font-size:13px;letter-spacing:0.12em;text-transform:uppercase;color:var(--wheat);}
+h1{font-family:'Fraunces',serif;font-weight:500;font-size:26px;margin:2px 0 22px;}
+.muted{color:var(--paper-dim);}
+.mono{font-family:'JetBrains Mono',monospace;}
+
+button{font-family:'Inter',sans-serif;font-size:13px;font-weight:500;background:var(--panel-2);color:var(--paper);border:1px solid var(--line);border-radius:7px;padding:8px 14px;cursor:pointer;}
+button:hover{border-color:var(--water);}
+button.primary{background:var(--water-dim);border-color:var(--water);}
+button.ghost{background:transparent;border-color:transparent;color:var(--paper-dim);padding:6px 8px;}
+button.ghost:hover{color:var(--paper);}
+button.danger{color:var(--red);}
+button.danger:hover{border-color:var(--red);}
+button.small{padding:5px 10px;font-size:12px;}
+.btn-link{font-family:'Inter',sans-serif;font-size:13px;font-weight:500;background:var(--panel-2);color:var(--paper);border:1px solid var(--line);border-radius:7px;padding:8px 14px;cursor:pointer;text-decoration:none;display:inline-block;}
+.btn-link:hover{border-color:var(--water);}
+
+input,select,textarea{font-family:'Inter',sans-serif;font-size:13px;color:var(--paper);background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:8px 10px;width:100%;}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--water);}
+label{font-size:11px;color:var(--paper-dim);display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.04em;}
+.field{margin-bottom:12px;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:14px;}
+.section-title{font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--wheat-dim);margin-bottom:10px;}
+.empty{text-align:center;padding:60px 20px;color:var(--paper-dim);}
+.empty .wheel{margin:0 auto 18px;}
+
+.wedding-row{display:flex;align-items:center;gap:14px;cursor:pointer;}
+.wedding-row:hover .coupleName{color:var(--wheat);}
+.coupleName{font-family:'Fraunces',serif;font-size:17px;transition:color .15s;}
+.wedding-meta{font-size:12px;color:var(--paper-dim);margin-top:2px;}
+.wedding-next{font-size:12px;margin-top:4px;}
+.row-right{margin-left:auto;}
+
+.badge{font-size:11px;padding:2px 8px;border-radius:20px;font-weight:500;white-space:nowrap;}
+.badge.ok{background:var(--green);color:#1b2614;}
+.badge.soon{background:var(--wheat);color:#3a2c0c;}
+.badge.late{background:var(--red);color:#fff;}
+.badge.done,.badge.neutral{background:var(--panel-2);color:var(--paper-dim);}
+
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;z-index:50;padding:20px;}
+.modal{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:22px;width:380px;max-width:100%;}
+.modal h2{font-family:'Fraunces',serif;font-size:18px;margin:0 0 16px;font-weight:500;}
+.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px;}
+
+.detail-head{display:flex;align-items:center;gap:16px;margin-bottom:18px;}
+.back{cursor:pointer;color:var(--paper-dim);font-size:13px;margin-bottom:14px;display:inline-flex;align-items:center;gap:5px;}
+.back:hover{color:var(--paper);}
+.detail-title{font-family:'Fraunces',serif;font-size:22px;font-weight:500;}
+.detail-date{color:var(--paper-dim);font-size:13px;margin-top:2px;}
+.progress-track{height:6px;background:var(--panel-2);border-radius:4px;overflow:hidden;margin-top:8px;}
+.progress-fill{height:100%;background:var(--water);transition:width .3s;}
+
+.tabs{display:flex;gap:4px;margin-bottom:16px;border-bottom:1px solid var(--line);}
+.tab{padding:8px 4px;font-size:13px;color:var(--paper-dim);cursor:pointer;border-bottom:2px solid transparent;margin-right:18px;}
+.tab.active{color:var(--paper);border-bottom-color:var(--wheat);}
+
+.phase{margin-bottom:18px;}
+.phase-title{font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--wheat-dim);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--line);}
+.item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);}
+.item:last-child{border-bottom:none;}
+.checkbox{width:20px;height:20px;border-radius:5px;border:1.5px solid var(--paper-dim);flex-shrink:0;margin-top:1px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;}
+.checkbox.checked{background:var(--green);border-color:var(--green);color:#1b2614;}
+.item-body{flex:1;}
+.item-label{font-size:14px;}
+.item-label.checked{color:var(--paper-dim);text-decoration:line-through;}
+.item-detail{font-size:12px;color:var(--paper-dim);margin-top:3px;}
+.item-link{font-size:12px;color:var(--water);text-decoration:none;display:inline-block;margin-top:5px;}
+.item-link:hover{text-decoration:underline;}
+.item-due{font-size:11px;margin-top:4px;}
+.item-note{margin-top:7px;}
+.item-note input{font-size:12px;padding:6px 8px;}
+
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.chip{background:var(--panel-2);border:1px solid var(--line);border-radius:20px;padding:4px 10px;font-size:12px;display:flex;align-items:center;gap:6px;}
+.chip button{padding:0;background:none;border:none;color:var(--paper-dim);font-size:13px;line-height:1;cursor:pointer;}
+.chip button:hover{color:var(--red);}
+.add-name-row{display:flex;gap:8px;margin-top:8px;}
+.add-name-row input{flex:1;}
+
+table.fin{width:100%;border-collapse:collapse;font-size:13px;}
+table.fin th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:0.04em;color:var(--paper-dim);padding:6px 4px;border-bottom:1px solid var(--line);}
+table.fin td{padding:7px 4px;border-bottom:1px solid var(--line);vertical-align:middle;}
+table.fin td.num{text-align:right;font-family:'JetBrains Mono',monospace;}
+table.fin tr.total td{border-top:1.5px solid var(--wheat-dim);border-bottom:none;font-weight:600;padding-top:10px;}
+.fin-label-input{width:100%;}
+.shift-grid{display:grid;grid-template-columns:1fr 60px 60px 70px 30px;gap:6px;align-items:center;}
+.shift-grid input{padding:6px 8px;font-size:12px;}
+.flat-grid{display:grid;grid-template-columns:1fr 100px 30px;gap:6px;align-items:center;}
+.flat-grid input{padding:6px 8px;font-size:12px;}
+.quickadd{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0;}
+
+textarea#msg-preview{width:100%;min-height:220px;font-family:'JetBrains Mono',monospace;font-size:12px;white-space:pre-wrap;resize:vertical;}
+.send-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+.note-small{font-size:11px;color:var(--paper-dim);margin-top:8px;}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+
+<script src="https://accounts.google.com/gsi/client" async defer onload="window.__gisLoaded=true; if(window.onGisReady) window.onGisReady();"></script>
+<script>
+const STORAGE_KEY = 'weddings';
+const SETTINGS_KEY = 'app_settings';
+let settings = { signature: 'Matěj Dohnal', googleClientId: '' };
+
+const COORDINATORS = ['', 'Honza + Verča', 'Matěj', 'Grochy', 'Eliška a Vojta'];
+
+const TEMPLATE = [
+  { phase: 'Před svatbou', items: [
+    { key:'guestbook', label:'Odeslat odkaz na knihu hostů', offset:-7, hasNote:true,
+      detail:'Zákonná evidence hostů přespávajících na mlýně. Vytvořit vlastní kopii odkazu (nesdílet citlivé údaje mezi svatbami), archivace 6 let.',
+      link:'https://docs.google.com/spreadsheets/d/1v64izE_OHMODxrOPPFsD-QrYPIxD6YIYhuyXJpxr3sQ/copy', linkLabel:'Šablona knihy hostů',
+      email:{
+        subject:'Kniha hostů – {coupleName}',
+        body:'Dobrý den,\n\nníže posíláme knihu hostů, prosíme vás o včasné vyplnění.\n\n{link}\n\nHezký den,\n{signature}'
+      } },
+    { key:'calculation', label:'Zaslat finální kalkulaci', offset:-7, hasNote:true,
+      detail:'Doplatek pronájmu, obsluha, příp. maringotka / koňský povoz / úklid, catering. Potvrdit e-mailem, ať pár není den po svatbě překvapen.' },
+    { key:'tarps', label:'Potvrdit plachty Vojtovi / Grochymu', offset:-2,
+      detail:'Zjistit od páru, jak chtějí mít plachty, a poslat dál nejpozději 48 h před svatbou.' },
+    { key:'deposit_collect', label:'Vybrat vratnou kauci 5 000 Kč (hotově)', offset:0, hasNote:true,
+      detail:'50 Kč za rozbitý kus nádobí se odečítá z kauce — poškození nahlásí pár sám.' },
+  ]},
+  { phase: 'Svatební den', items: [
+    { key:'arrival', label:'Příjezd min. 30 minut před svatebčany', offset:0,
+      detail:'Nespoléhat na to, že je na místě už někdo jiný (Vojta, Grochy).' },
+    { key:'venue_check', label:'Kontrola připravenosti areálu', offset:0,
+      detail:'Ubytování, koupelny, bar, nádobí, zázemí kuchyně, další domluvené věci.' },
+    { key:'inform_couple', label:'Upozornit pár na stav prostor', offset:0,
+      detail:'Doporučit, ať si stav vyfotí před začátkem svatby.' },
+    { key:'safety_briefing', label:'Seznámit pár s elektřinou, hasicími přístroji a provozním řádem', offset:0 },
+    { key:'handover_1', label:'Podpis předávacího protokolu (1. strana)', offset:0,
+      detail:'Protokol si kontaktní osoba uchovává, kompletace proběhne po konci sezóny.' },
+  ]},
+  { phase: 'Po svatbě', items: [
+    { key:'post_check', label:'Kontrola stavu areálu po svatbě', offset:1,
+      detail:'Ubytování, stodola, koupelny, bar, kuchyň, nádobí.' },
+    { key:'damage_report', label:'Nahlásit Vojtovi rozbité / poškozené vybavení', offset:1, hasNote:true },
+    { key:'deposit_return', label:'Vyúčtovat a vrátit kauci', offset:1, hasNote:true,
+      detail:'Pokud úklid nebyl dostatečný, odhadnout cenu douklízení a odečíst z kauce.' },
+    { key:'handover_2', label:'Vyplnit 2. stranu předávacího protokolu', offset:1 },
+  ]},
+  { phase: 'Platby po svatbě', items: [
+    { key:'pay_staff', label:'Přijmout úhradu obsluhy a rozeslat obsluze', offset:1, hasNote:true },
+    { key:'pay_cleaning', label:'Úhrada závěrečného úklidu (2 500 Kč) — pokud relevantní', offset:1, hasNote:true },
+    { key:'pay_catering', label:'Vyúčtovat catering Válková', offset:1, hasNote:true,
+      detail:'Paní Válková sdělí celkovou částku + provizi. Provizi si kontaktní osoba nechá, zbytek předá hotově.' },
+    { key:'pay_rent', label:'Doplatek pronájmu dle smlouvy', offset:1,
+      link:'https://dohnaluvmlyn.cz/qr/', linkLabel:'QR generátor plateb' },
+    { key:'pay_coffee', label:'Úhrada kávy (1 500 Kč / 2 kg, 750 Kč za další kg navíc)', offset:1 },
+    { key:'pay_caravan', label:'Úhrada pronájmu maringotky (4 000 Kč)', offset:1 },
+    { key:'pay_cart_bar', label:'Úhrada baru z koňského povozu (5 000 Kč)', offset:1 },
+  ]},
+  { phase: 'Závěr', items: [
+    { key:'thank_you', label:'Zaslat děkovný e-mail + dotazník zpětné vazby + žádost o fotky a Google recenzi', offset:2,
+      detail:'Šablona e-mailu je v interním manuálu — zkopírovat, doplnit jméno.' },
+    { key:'financial_summary', label:'Odeslat soupis služeb a doplatků páru', offset:1,
+      detail:'Generuje se v záložce Finance v detailu svatby.' },
+  ]},
+];
+
+const ALL_ITEMS = TEMPLATE.flatMap(p => p.items.map(i => ({...i, phase:p.phase})));
+
+const FLAT_TEMPLATES = ['Úklid paušál','Maringotka','Doplatek nájem','Catering','Káva','Pivo + Kofola','Koňský povoz'];
+
+const SEED_WEDDINGS = [
+  {date:'2026-04-18',day:'Sobota',coord:'Honza + Verča',staff:5,guests:100,service:['Lenka Helísková','Jan Kenša','Monika Kenša','Petra Pospíšilová'],cleaning:['Monika Kenša','Petra Grochalová','Petra Pospíšilová','Lenka Helísková','Lucka Dohnalová']},
+  {date:'2026-04-25',day:'Sobota',coord:'Matěj',staff:4,guests:60,service:['Matěj Dohnal','Petra Pospíšilová','Tereza Puršová','Lenka Helísková'],cleaning:['Petra Grochalová','Petra Pospíšilová','Kamča Zavadilová','Lenka Helísková','Monika Kenša']},
+  {date:'2026-05-02',day:'Sobota',coord:'Honza + Verča',staff:null,guests:60,service:[],cleaning:['Monika Kenša','Lenka Helísková']},
+  {date:'2026-05-07',day:'Čtvrtek',coord:'Grochy',staff:null,guests:30,service:['Tomáš Grochal','Monika Kenša','Lenka Helísková'],cleaning:['Monika Kenša','Petra Grochalová','Kamča Zavadilová','Lenka Helísková','Lucka Dohnalová']},
+  {date:'2026-05-09',day:'Sobota',coord:'Grochy',staff:null,guests:80,service:['Monika Kenša','Jan Kenša','Lenka Helísková','Kamča Zavadilová'],cleaning:['Petra Pospíšilová','Lenka Helísková','Lucka Dohnalová']},
+  {date:'2026-05-14',day:'Čtvrtek',coord:'Matěj',staff:4,guests:65,service:['Monika Kenša','Tereza Puršová','Tomáš Grochal','Petra Pospíšilová'],cleaning:['Petra Grochalová','Kamča Zavadilová','Tereza Puršová']},
+  {date:'2026-05-16',day:'Sobota',coord:'Matěj',staff:3,guests:50,service:['Monika Kenša','Jan Kenša','Tomáš Grochal','Petra Grochalová','Petra Pospíšilová'],cleaning:['Petra Pospíšilová','Lucka Dohnalová','Monika Kenša']},
+  {date:'2026-05-21',day:'Čtvrtek',coord:'Eliška a Vojta',staff:null,guests:70,service:[],cleaning:['Monika Kenša','Tereza Puršová']},
+  {date:'2026-05-23',day:'Sobota',coord:'Eliška a Vojta',staff:null,guests:90,service:['Tereza Puršová'],cleaning:['Petra Pospíšilová','Tereza Puršová']},
+  {date:'2026-05-28',day:'Čtvrtek',coord:'Honza + Verča',staff:null,guests:30,service:['Tomáš Grochal'],cleaning:['Monika Kenša','Lucka Dohnalová']},
+  {date:'2026-05-30',day:'Sobota',coord:'Honza + Verča',staff:null,guests:45,service:['Tomáš Grochal'],cleaning:['Monika Kenša','Lucka Dohnalová','Petra Pospíšilová']},
+  {date:'2026-06-04',day:'Čtvrtek',coord:'Grochy',staff:null,guests:80,service:['Tomáš Grochal','Monika Kenša'],cleaning:['Petra Grochalová','Kamča Zavadilová']},
+  {date:'2026-06-06',day:'Sobota',coord:'Grochy',staff:null,guests:80,service:['Monika Kenša','Jan Kenša'],cleaning:['Monika Kenša','Tereza Puršová','Petra Pospíšilová']},
+  {date:'2026-06-11',day:'Čtvrtek',coord:'Matěj',staff:null,guests:null,service:['Monika Kenša','Tereza Puršová','Tomáš Grochal'],cleaning:['Tereza Puršová']},
+  {date:'2026-06-13',day:'Sobota',coord:'Matěj',staff:5,guests:90,service:['Monika Kenša','Jan Kenša','Tomáš Grochal','Petra Grochalová','Petra Pospíšilová'],cleaning:['Tereza Puršová','Petra Pospíšilová']},
+  {date:'2026-06-18',day:'Čtvrtek',coord:'Eliška a Vojta',staff:null,guests:60,service:['Tomáš Grochal'],cleaning:['Monika Kenša']},
+  {date:'2026-06-20',day:'Sobota',coord:'Eliška a Vojta',staff:null,guests:50,service:[],cleaning:['Monika Kenša']},
+  {date:'2026-06-25',day:'Čtvrtek',coord:'Honza + Verča',staff:null,guests:80,service:['Tomáš Grochal'],cleaning:['Monika Kenša']},
+  {date:'2026-06-27',day:'Sobota',coord:'Honza + Verča',staff:null,guests:null,service:[],cleaning:['Monika Kenša']},
+  {date:'2026-07-02',day:'Čtvrtek',coord:'Honza + Verča',staff:null,guests:80,service:['Tomáš Grochal'],cleaning:['Monika Kenša']},
+  {date:'2026-07-04',day:'Sobota',coord:'Honza + Verča',staff:null,guests:70,service:['Jan Kenša','Monika Kenša','Petra Pospíšilová'],cleaning:[]},
+  {date:'2026-07-09',day:'Čtvrtek',coord:'Grochy',staff:null,guests:45,service:['Monika Kenša','Jan Kenša'],cleaning:['Monika Kenša']},
+  {date:'2026-07-11',day:'Sobota',coord:'Grochy',staff:null,guests:80,service:['Monika Kenša','Jan Kenša','Kamča Zavadilová'],cleaning:['Monika Kenša']},
+  {date:'2026-07-16',day:'Čtvrtek',coord:'Eliška a Vojta',staff:null,guests:85,service:[],cleaning:['Monika Kenša']},
+  {date:'2026-07-18',day:'Sobota',coord:'Eliška a Vojta',staff:null,guests:60,service:[],cleaning:['Monika Kenša','Petra Pospíšilová']},
+  {date:'2026-07-23',day:'Čtvrtek',coord:'Matěj',staff:5,guests:75,service:['Tomáš Grochal','Petra Pospíšilová','Monika Kenša','Jan Kenša'],cleaning:['Tereza Puršová']},
+  {date:'2026-07-25',day:'Sobota',coord:'Matěj',staff:3,guests:50,service:['Monika Kenša','Jan Kenša','Tereza Puršová','Tomáš Grochal','Petra Pospíšilová'],cleaning:['Petra Pospíšilová']},
+  {date:'2026-07-30',day:'Čtvrtek',coord:'Honza + Verča',staff:null,guests:60,service:['Tomáš Grochal'],cleaning:[]},
+  {date:'2026-08-01',day:'Sobota',coord:'Honza + Verča',staff:null,guests:80,service:[],cleaning:[]},
+  {date:'2026-08-06',day:'Čtvrtek',coord:'Eliška a Vojta',staff:null,guests:45,service:[],cleaning:['Monika Kenša']},
+  {date:'2026-08-08',day:'Sobota',coord:'Eliška a Vojta',staff:null,guests:65,service:[],cleaning:['Monika Kenša']},
+  {date:'2026-08-13',day:'Čtvrtek',coord:'Matěj',staff:3,guests:30,service:['Monika Kenša','Jan Kenša','Tomáš Grochal','Petra Pospíšilová'],cleaning:[]},
+  {date:'2026-08-15',day:'Sobota',coord:'Matěj',staff:null,guests:null,service:['Monika Kenša','Jan Kenša','Petra Pospíšilová'],cleaning:[]},
+  {date:'2026-08-20',day:'Čtvrtek',coord:'Matěj',staff:null,guests:70,service:['Monika Kenša','Jan Kenša','Petra Pospíšilová'],cleaning:[]},
+  {date:'2026-08-22',day:'Sobota',coord:'Matěj',staff:2,guests:60,service:['Petra Pospíšilová','Monika Kenša','Jan Kenša'],cleaning:[]},
+  {date:'2026-08-27',day:'Čtvrtek',coord:'Grochy',staff:null,guests:70,service:[],cleaning:[]},
+  {date:'2026-08-29',day:'Sobota',coord:'Grochy',staff:null,guests:70,service:['Tomáš Grochal','Monika Kenša','Jan Kenša'],cleaning:[]},
+  {date:'2026-09-03',day:'Čtvrtek',coord:'Grochy',staff:null,guests:70,service:[],cleaning:[]},
+  {date:'2026-09-05',day:'Sobota',coord:null,staff:null,guests:null,service:[],cleaning:[]},
+  {date:'2026-09-10',day:'Čtvrtek',coord:'Matěj',staff:3,guests:null,service:['Tomáš Grochal'],cleaning:[]},
+  {date:'2026-09-12',day:'Sobota',coord:'Matěj',staff:3,guests:null,service:['Monika Kenša','Jan Kenša','Tomáš Grochal','Petra Grochalová'],cleaning:[]},
+  {date:'2026-09-17',day:'Čtvrtek',coord:'Honza + Verča',staff:null,guests:65,service:['Tomáš Grochal'],cleaning:[]},
+  {date:'2026-09-19',day:'Sobota',coord:'Honza + Verča',staff:null,guests:80,service:[],cleaning:[]},
+  {date:'2026-09-24',day:'Čtvrtek',coord:'Grochy',staff:null,guests:60,service:['Tomáš Grochal'],cleaning:[]},
+  {date:'2026-09-26',day:'Sobota',coord:'Grochy',staff:null,guests:65,service:['Tomáš Grochal','Monika Kenša','Jan Kenša'],cleaning:[]},
+  {date:'2026-10-01',day:'Čtvrtek',coord:'Grochy',staff:null,guests:70,service:['Tomáš Grochal'],cleaning:[]},
+  {date:'2026-10-03',day:'Sobota',coord:'Grochy',staff:null,guests:80,service:['Tomáš Grochal','Jan Kenša','Monika Kenša'],cleaning:[]},
+  {date:'2026-10-10',day:'Sobota',coord:'Eliška a Vojta',staff:null,guests:50,service:[],cleaning:[]},
+  {date:'2027-05-15',day:'Sobota',coord:null,staff:null,guests:90,service:[],cleaning:[]},
+  {date:'2027-05-29',day:'Sobota',coord:null,staff:null,guests:50,service:[],cleaning:[]},
+  {date:'2027-06-05',day:'Sobota',coord:null,staff:null,guests:60,service:[],cleaning:[]},
+  {date:'2027-06-19',day:'Sobota',coord:null,staff:null,guests:80,service:[],cleaning:[]},
+  {date:'2027-06-26',day:'Sobota',coord:null,staff:null,guests:60,service:[],cleaning:[]},
+  {date:'2027-07-03',day:'Sobota',coord:null,staff:null,guests:80,service:[],cleaning:[]},
+  {date:'2027-07-08',day:'Čtvrtek',coord:null,staff:null,guests:70,service:[],cleaning:[]},
+  {date:'2027-07-10',day:'Sobota',coord:null,staff:null,guests:75,service:[],cleaning:[]},
+  {date:'2027-07-17',day:'Sobota',coord:null,staff:null,guests:100,service:[],cleaning:[]},
+  {date:'2027-07-24',day:'Sobota',coord:null,staff:null,guests:50,service:[],cleaning:[]},
+  {date:'2027-07-31',day:'Sobota',coord:null,staff:null,guests:70,service:[],cleaning:[]},
+  {date:'2027-08-12',day:'Čtvrtek',coord:null,staff:null,guests:90,service:[],cleaning:[]},
+  {date:'2027-08-21',day:'Sobota',coord:null,staff:null,guests:60,service:[],cleaning:[]},
+  {date:'2027-09-04',day:'Sobota',coord:null,staff:null,guests:90,service:[],cleaning:[]},
+  {date:'2027-09-11',day:'Sobota',coord:null,staff:null,guests:50,service:[],cleaning:[]},
+  {date:'2027-09-18',day:'Sobota',coord:null,staff:null,guests:105,service:[],cleaning:[]},
+];
+
+const SEED_NAMES = {
+  '2026-07-23': 'Zbrožková', '2026-07-25': 'Galuščiaková', '2026-08-13': 'Kolísková',
+  '2026-08-15': 'Schoffer', '2026-08-20': 'Kremr', '2026-08-22': 'Alinče',
+  '2026-09-10': 'Pomykalová', '2026-09-12': 'Valová',
+  '2027-05-15': 'Vojtěch Dohnal', '2027-05-29': 'Michaela Čížková', '2027-06-05': 'Jiří Pařízek',
+  '2027-06-19': 'Monika Dočkalová & Ondřej Smoček', '2027-06-26': 'Michaela Jehlíková',
+  '2027-07-03': 'Marie Zdráhalová', '2027-07-08': 'Aneta Nejedlíková', '2027-07-10': 'Lenka Němečková',
+  '2027-07-17': 'Jakub Zálešák', '2027-07-24': 'Justýna Brázdilová', '2027-07-31': 'Sára Plucnarová',
+  '2027-08-12': 'Johana Fabíková', '2027-08-21': 'Monika Peluňková', '2027-09-04': 'Nadan Pojer',
+  '2027-09-11': 'Sára Konečná', '2027-09-18': 'Ellen Palmeová',
+};
+const SEED_EMAILS = {
+  '2026-07-23': 'z.valerie@seznam.cz', '2026-07-25': 'galusciakova.z@gmail.com', '2026-08-13': 'koliskova.andrea@gmail.com',
+  '2026-08-15': 'david.schoffer@cz.bosch.com', '2026-08-22': 'markova.el78@gmail.com',
+  '2026-09-10': 'kackapomykalova@gmail.com', '2026-09-12': 'unka.valova@gmail.com',
+  '2027-05-15': 'dohnalv@proton.me', '2027-05-29': 'michaela.c@email.cz', '2027-06-05': 'parizek.jiri@gmail.com',
+  '2027-06-19': 'xdockalova@seznam.cz', '2027-06-26': 'michaelajehlikova@gmail.com', '2027-07-03': 'miazdrahalova@gmail.com',
+  '2027-07-08': 'anetanejedlikova@gmail.com', '2027-07-10': 'lenusnemeckova@seznam.cz', '2027-07-17': 'jakub.zalesak@gmail.com',
+  '2027-07-24': 'justynabrazdilova@seznam.cz', '2027-07-31': 'sara.plucnarova1306@seznam.cz', '2027-08-12': 'Johanafab2000@seznam.cz',
+  '2027-08-21': 'm.pelunkova@seznam.cz', '2027-09-04': 'n.pojer@gmail.com', '2027-09-11': 'konecna.s@seznam.cz',
+  '2027-09-18': 'ellenpalme@seznam.cz',
+};
+const SEED_PHONES = {
+  '2027-07-03': '+420 777 323 833', '2027-09-04': '+420 723 923 350',
+};
+
+function importSeedWeddings(){
+  const existingDates = new Set(weddings.map(w => w.date));
+  let added = 0;
+  SEED_WEDDINGS.forEach(s => {
+    if(existingDates.has(s.date)) return;
+    const couple = SEED_NAMES[s.date] || `Svatba ${fmt(new Date(s.date))}`;
+    const nw = freshWedding(couple, s.date);
+    nw.coordinator = s.coord || '';
+    nw.guests = s.guests;
+    nw.staffPlanned = s.staff;
+    nw.serviceNames = [...(s.service||[])];
+    nw.cleaningNames = [...(s.cleaning||[])];
+    nw.contactEmail = SEED_EMAILS[s.date] || '';
+    nw.contactPhone = SEED_PHONES[s.date] || '';
+    weddings.push(nw);
+    added++;
+  });
+  persist();
+  render();
+  return added;
+}
+
+let weddings = [];
+let view = { mode:'list', weddingId:null, tab:'checklist' };
+let coordFilter = '';
+let upcomingOnly = false;
+let modal = null;
+
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+
+function freshItemsState(){
+  const state = {};
+  ALL_ITEMS.forEach(i => state[i.key] = { done:false, note:'' });
+  return state;
+}
+
+function freshWedding(coupleName, date){
+  return {
+    id: uid(), coupleName, date,
+    coordinator:'', guests:null, staffPlanned:null,
+    serviceNames:[], cleaningNames:[],
+    contactPhone:'', contactEmail:'',
+    rentDeposit:null, rentBalance:null,
+    guestbookLink:'',
+    items: freshItemsState(),
+    finance: { shifts:[], flatItems:[] },
+  };
+}
+
+function migrate(w){
+  if(!w.coordinator) w.coordinator = '';
+  if(w.guests === undefined) w.guests = null;
+  if(w.staffPlanned === undefined) w.staffPlanned = null;
+  if(!w.serviceNames) w.serviceNames = [];
+  if(!w.cleaningNames) w.cleaningNames = [];
+  if(w.contactPhone === undefined) w.contactPhone = '';
+  if(w.contactEmail === undefined) w.contactEmail = '';
+  if(w.rentDeposit === undefined) w.rentDeposit = null;
+  if(w.rentBalance === undefined) w.rentBalance = null;
+  if(w.guestbookLink === undefined) w.guestbookLink = '';
+  if(!w.finance) w.finance = { shifts:[], flatItems:[] };
+  ALL_ITEMS.forEach(i => { if(!w.items[i.key]) w.items[i.key] = { done:false, note:'' }; });
+  return w;
+}
+
+async function load(){
+  try{
+    const res = await window.storage.get(STORAGE_KEY, false);
+    weddings = res && res.value ? JSON.parse(res.value).map(migrate) : [];
+  }catch(e){
+    weddings = [];
+  }
+  try{
+    const res2 = await window.storage.get(SETTINGS_KEY, false);
+    if(res2 && res2.value) settings = { ...settings, ...JSON.parse(res2.value) };
+  }catch(e){}
+  initGis();
+  render();
+}
+
+async function persist(){
+  try{ await window.storage.set(STORAGE_KEY, JSON.stringify(weddings), false); }
+  catch(e){ console.error('Uložení se nezdařilo', e); }
+}
+
+async function persistSettings(){
+  try{ await window.storage.set(SETTINGS_KEY, JSON.stringify(settings), false); }
+  catch(e){ console.error('Uložení nastavení se nezdařilo', e); }
+}
+
+function fillTemplate(tpl, vars){
+  return tpl.replace(/\{(\w+)\}/g, (_, k) => (vars[k] !== undefined && vars[k] !== null && vars[k] !== '') ? vars[k] : '');
+}
+
+let gisTokenClient = null;
+let gmailAccessToken = null;
+let gmailTokenExpiresAt = 0;
+const GMAIL_SCOPE = 'https://www.googleapis.com/auth/gmail.send';
+
+function gmailConnected(){ return !!gmailAccessToken && Date.now() < gmailTokenExpiresAt; }
+
+function initGis(){
+  if(!window.google || !window.google.accounts || !settings.googleClientId){ gisTokenClient = null; return; }
+  gisTokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: settings.googleClientId,
+    scope: GMAIL_SCOPE,
+    callback: () => {},
+  });
+}
+window.onGisReady = initGis;
+
+function ensureGmailToken(){
+  return new Promise((resolve, reject) => {
+    if(gmailConnected()){ resolve(gmailAccessToken); return; }
+    if(!window.__gisLoaded){ reject(new Error('Google knihovna se ještě nenačetla, zkus to za chvíli znovu.')); return; }
+    if(!settings.googleClientId){ reject(new Error('Chybí Google Client ID — vyplň ho v nastavení appky.')); return; }
+    if(!gisTokenClient) initGis();
+    if(!gisTokenClient){ reject(new Error('Gmail se nepodařilo inicializovat.')); return; }
+    gisTokenClient.callback = (resp) => {
+      if(resp.error){ reject(new Error(resp.error)); return; }
+      gmailAccessToken = resp.access_token;
+      gmailTokenExpiresAt = Date.now() + (resp.expires_in*1000 - 60000);
+      resolve(gmailAccessToken);
+    };
+    gisTokenClient.requestAccessToken({ prompt: gmailAccessToken ? '' : 'consent' });
+  });
+}
+
+function base64UrlEncode(str){
+  const bytes = new TextEncoder().encode(str);
+  let binary = '';
+  bytes.forEach(b => binary += String.fromCharCode(b));
+  return btoa(binary).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+function mimeEncodeWord(text){
+  const bytes = new TextEncoder().encode(text);
+  let binary = '';
+  bytes.forEach(b => binary += String.fromCharCode(b));
+  return '=?UTF-8?B?' + btoa(binary) + '?=';
+}
+
+async function sendViaGmail(to, subject, bodyText){
+  const token = await ensureGmailToken();
+  const raw = base64UrlEncode([
+    `To: ${to}`,
+    'Content-Type: text/plain; charset="UTF-8"',
+    'MIME-Version: 1.0',
+    `Subject: ${mimeEncodeWord(subject)}`,
+    '',
+    bodyText,
+  ].join('\r\n'));
+  const res = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ raw }),
+  });
+  if(!res.ok){
+    const errText = await res.text();
+    throw new Error('Gmail API: ' + errText);
+  }
+  return res.json();
+}
+
+function dateOnly(d){ const x = new Date(d); x.setHours(0,0,0,0); return x; }
+function addDays(date, days){ const d = new Date(date); d.setDate(d.getDate()+days); return d; }
+function fmt(d){ return d.toLocaleDateString('cs-CZ',{day:'numeric',month:'numeric',year:'numeric'}); }
+function todayMid(){ return dateOnly(new Date()); }
+function kc(n){ return (n||0).toLocaleString('cs-CZ') + ' Kč'; }
+
+function itemDueDate(w, item){ return addDays(dateOnly(w.date), item.offset); }
+
+function itemStatus(w, item){
+  const state = w.items[item.key];
+  if(state.done) return 'done';
+  const diffDays = Math.round((itemDueDate(w,item) - todayMid()) / 86400000);
+  if(diffDays < 0) return 'late';
+  if(diffDays <= 2) return 'soon';
+  return 'neutral';
+}
+function badgeText(w, item, status){
+  const due = itemDueDate(w,item);
+  if(status === 'done') return 'Hotovo';
+  if(status === 'late') return 'Po termínu · ' + fmt(due);
+  return fmt(due);
+}
+function weddingProgress(w){
+  const total = ALL_ITEMS.length;
+  const done = ALL_ITEMS.filter(i => w.items[i.key].done).length;
+  return { done, total, pct: total ? Math.round(done/total*100) : 0 };
+}
+function nextOpenItem(w){
+  const open = ALL_ITEMS.filter(i => !w.items[i.key].done)
+    .map(i => ({ item:i, due:itemDueDate(w,i) })).sort((a,b) => a.due - b.due);
+  return open[0] || null;
+}
+
+function financeTotal(w){
+  const shiftsTotal = w.finance.shifts.reduce((s,x) => s + (x.people||0)*(x.hours||0)*(x.rate||0), 0);
+  const flatTotal = w.finance.flatItems.reduce((s,x) => s + (x.amount||0), 0);
+  return shiftsTotal + flatTotal;
+}
+
+function buildMessageText(w){
+  const lines = [];
+  lines.push(`Soupis služeb a doplatků — ${w.coupleName} (${fmt(new Date(w.date))})`);
+  lines.push('');
+  w.finance.shifts.forEach(s => {
+    const amount = (s.people||0)*(s.hours||0)*(s.rate||0);
+    lines.push(`${s.label || 'Obsluha'}: ${s.people||0} × ${s.hours||0} h × ${s.rate||0} Kč = ${kc(amount)}`);
+  });
+  w.finance.flatItems.forEach(f => {
+    lines.push(`${f.label || '—'}: ${kc(f.amount||0)}`);
+  });
+  lines.push('');
+  lines.push(`Celkem: ${kc(financeTotal(w))}`);
+  return lines.join('\n');
+}
+
+function wheelSvg(pct, size){
+  size = size || 56;
+  const r = size/2 - 6, c = size/2;
+  const circumference = 2*Math.PI*r;
+  const offset = circumference * (1 - pct/100);
+  let spokeLines = '';
+  for(let k=0;k<8;k++){
+    const a = (k/8) * Math.PI*2;
+    const x1 = c + Math.cos(a)*(r-9), y1 = c + Math.sin(a)*(r-9);
+    const x2 = c + Math.cos(a)*r, y2 = c + Math.sin(a)*r;
+    spokeLines += `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="#463c34" stroke-width="2"/>`;
+  }
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+    <circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="#332c27" stroke-width="5"/>
+    ${spokeLines}
+    <circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="#6fa3bd" stroke-width="5"
+      stroke-dasharray="${circumference.toFixed(1)}" stroke-dashoffset="${offset.toFixed(1)}"
+      stroke-linecap="round" transform="rotate(-90 ${c} ${c})"/>
+    <circle cx="${c}" cy="${c}" r="3" fill="#d6a541"/></svg>`;
+}
+
+function escapeHtml(s){
+  return (s===null||s===undefined?'':String(s)).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function render(){
+  const app = document.getElementById('app');
+  app.innerHTML = view.mode === 'detail' ? renderDetail() : renderList();
+  if(modal) app.insertAdjacentHTML('beforeend', modal.html);
+  attachEvents();
+}
+
+function renderList(){
+  const all = [...weddings].sort((a,b) => new Date(a.date) - new Date(b.date));
+  let sorted = coordFilter ? all.filter(w => w.coordinator === coordFilter) : all;
+  if(upcomingOnly){
+    const today = todayMid();
+    sorted = sorted.filter(w => dateOnly(w.date) >= today);
+  }
+  const filterHtml = `
+    <div style="display:flex;align-items:flex-end;gap:18px;margin-bottom:16px;flex-wrap:wrap;">
+      <div class="field" style="max-width:240px;margin-bottom:0;">
+        <label>Filtrovat dle koordinátora</label>
+        <select id="coord-filter" data-action="filter-coord">
+          <option value="">Všichni koordinátoři</option>
+          ${COORDINATORS.filter(c => c).map(c => `<option value="${escapeHtml(c)}" ${coordFilter===c?'selected':''}>${escapeHtml(c)}</option>`).join('')}
+        </select>
+      </div>
+      <label style="display:flex;align-items:center;gap:6px;text-transform:none;font-size:13px;color:var(--paper);cursor:pointer;margin-bottom:8px;">
+        <input type="checkbox" id="upcoming-filter" data-action="filter-upcoming" style="width:auto;" ${upcomingOnly?'checked':''}/>
+        Jen nadcházející
+      </label>
+    </div>`;
+  let body;
+  if(all.length === 0){
+    body = `<div class="empty">
+      <div class="wheel">${wheelSvg(0,72)}</div>
+      <p>Žádná svatba zatím není založená.</p>
+      <button class="primary" data-action="new-wedding">Založit svatbu</button>
+    </div>`;
+  } else if(sorted.length === 0){
+    body = `<div class="empty"><p>Pro tento filtr žádná svatba není.</p></div>`;
+  } else {
+    body = sorted.map(w => {
+      const prog = weddingProgress(w);
+      const next = nextOpenItem(w);
+      const status = next ? itemStatus(w, next.item) : 'done';
+      const badgeClass = status === 'late' ? 'late' : status === 'soon' ? 'soon' : status === 'done' ? 'done' : 'neutral';
+      const nextLine = next
+        ? `<div class="wedding-next muted">Další: ${escapeHtml(next.item.label)} <span class="badge ${badgeClass}" style="margin-left:6px;">${badgeText(w, next.item, status)}</span></div>`
+        : `<div class="wedding-next"><span class="badge ok">Vše hotovo</span></div>`;
+      const coordTxt = w.coordinator ? ` · ${escapeHtml(w.coordinator)}` : '';
+      return `
+      <div class="card wedding-row" data-action="open-wedding" data-id="${w.id}">
+        <div>${wheelSvg(prog.pct, 48)}</div>
+        <div>
+          <div class="coupleName">${escapeHtml(w.coupleName)}</div>
+          <div class="wedding-meta mono">${fmt(new Date(w.date))}${coordTxt} · ${prog.done}/${prog.total} splněno</div>
+          ${nextLine}
+        </div>
+        <div class="row-right">
+          <button class="ghost danger" data-action="delete-wedding" data-id="${w.id}" title="Smazat svatbu">✕</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  return `
+    <span class="brand">Dohnalův mlýn</span>
+    <h1>Svatební sezóna</h1>
+    <div class="field" style="max-width:280px;margin-bottom:16px;">
+      <label>Podpis v generovaných e-mailech</label>
+      <input type="text" id="signature-input" value="${escapeHtml(settings.signature)}" placeholder="Jméno a příjmení"/>
+    </div>
+    <div class="card" style="margin-bottom:16px;">
+      <div class="section-title">Gmail napojení</div>
+      <div class="field">
+        <label>Google OAuth Client ID</label>
+        <input type="text" id="google-clientid-input" value="${escapeHtml(settings.googleClientId)}" placeholder="xxxxxxxx.apps.googleusercontent.com"/>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button data-action="connect-gmail">${gmailConnected() ? 'Znovu ověřit' : 'Připojit Gmail'}</button>
+        <span class="badge ${gmailConnected() ? 'ok' : 'neutral'}">${gmailConnected() ? 'Gmail připojen' : 'Gmail nepřipojen'}</span>
+      </div>
+      <div class="note-small">Client ID si vytvoříš v Google Cloud Console (OAuth Client ID, typ Webová aplikace) a do Authorized JavaScript origins přidáš adresu, na které appku necháš běžet. V náhledu Claude artefaktu to nemusí fungovat — appka musí běžet na reálné https adrese.</div>
+    </div>
+    <div style="margin-bottom:16px;display:flex;gap:8px;">
+      <button class="primary" data-action="new-wedding">+ Nová svatba</button>
+      <button data-action="import-seed">Nahrát svatby ze seedu</button>
+    </div>
+    ${all.length > 0 ? filterHtml : ''}
+    ${body}
+  `;
+}
+
+function nameChips(names, kind){
+  if(!names.length) return `<div class="muted" style="font-size:12px;">Zatím nikdo přiřazen.</div>`;
+  return `<div class="chips">${names.map((n,i) => `
+    <div class="chip">${escapeHtml(n)}<button data-action="remove-name" data-kind="${kind}" data-idx="${i}">✕</button></div>
+  `).join('')}</div>`;
+}
+
+function renderInfoTab(w){
+  return `
+    <div class="card">
+      <div class="section-title">Základní informace</div>
+      <div class="row2">
+        <div class="field"><label>Koordinátor</label>
+          <select data-bind="coordinator">
+            ${COORDINATORS.map(c => `<option value="${escapeHtml(c)}" ${w.coordinator===c?'selected':''}>${c || '—'}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field"><label>Datum svatby</label><input type="date" data-bind="date" value="${w.date}"/></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>Počet hostů</label><input type="number" min="0" data-bind="guests" value="${w.guests ?? ''}"/></div>
+        <div class="field"><label>Obsluha — plánovaný počet</label><input type="number" min="0" data-bind="staffPlanned" value="${w.staffPlanned ?? ''}"/></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>Telefon páru</label><input type="text" data-bind="contactPhone" value="${escapeHtml(w.contactPhone)}" placeholder="+420 ..."/></div>
+        <div class="field"><label>E-mail páru</label><input type="text" data-bind="contactEmail" value="${escapeHtml(w.contactEmail)}" placeholder="jméno@email.cz"/></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>Záloha na nájem (Kč)</label><input type="number" min="0" data-bind="rentDeposit" value="${w.rentDeposit ?? ''}"/></div>
+        <div class="field"><label>Doplatek nájmu (Kč)</label><input type="number" min="0" data-bind="rentBalance" value="${w.rentBalance ?? ''}"/></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-title">Obsluha — jména</div>
+      ${nameChips(w.serviceNames, 'serviceNames')}
+      <div class="add-name-row">
+        <input type="text" id="new-service-name" placeholder="Jméno a příjmení"/>
+        <button class="small" data-action="add-name" data-kind="serviceNames">Přidat</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-title">Úklid — jména</div>
+      ${nameChips(w.cleaningNames, 'cleaningNames')}
+      <div class="add-name-row">
+        <input type="text" id="new-cleaning-name" placeholder="Jméno a příjmení"/>
+        <button class="small" data-action="add-name" data-kind="cleaningNames">Přidat</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderChecklistTab(w){
+  return TEMPLATE.map(phase => {
+    const itemsHtml = phase.items.map(item => {
+      const state = w.items[item.key];
+      const status = itemStatus(w, item);
+      const badgeClass = status === 'late' ? 'late' : status === 'soon' ? 'soon' : status === 'done' ? 'done' : 'neutral';
+      const emailBlock = item.email ? (() => {
+        const canSend = w.contactEmail && w.guestbookLink;
+        const vars = { coupleName: w.coupleName, link: w.guestbookLink, signature: settings.signature };
+        const mailHref = canSend
+          ? `mailto:${encodeURIComponent(w.contactEmail)}?subject=${encodeURIComponent(fillTemplate(item.email.subject, vars))}&body=${encodeURIComponent(fillTemplate(item.email.body, vars))}`
+          : '';
+        return `
+        <div class="item-note">
+          <label style="margin-top:8px;">Konkrétní odkaz pro tuto svatbu</label>
+          <input type="text" placeholder="https://docs.google.com/..." value="${escapeHtml(w.guestbookLink)}" data-action="bind-guestbook-link" data-key="${item.key}"/>
+        </div>
+        <div class="send-row" style="margin-top:6px;">
+          ${canSend
+            ? `<a href="${mailHref}" class="btn-link">Odeslat e-mailem</a>`
+            : `<button class="small" disabled>Odeslat e-mailem</button><span class="note-small" style="margin:0;">Chybí ${!w.contactEmail ? 'e-mail páru (záložka Info &amp; lidé)' : 'konkrétní odkaz'}</span>`}
+          ${canSend && gmailConnected()
+            ? `<button class="small" data-action="send-gmail-item" data-key="${item.key}">Odeslat přes Gmail</button>`
+            : ''}
+        </div>`;
+      })() : '';
+      return `
+      <div class="item">
+        <div class="checkbox ${state.done ? 'checked':''}" data-action="toggle-item" data-key="${item.key}">${state.done ? '✓' : ''}</div>
+        <div class="item-body">
+          <div class="item-label ${state.done?'checked':''}">${escapeHtml(item.label)}</div>
+          ${item.detail ? `<div class="item-detail">${escapeHtml(item.detail)}</div>` : ''}
+          ${item.link ? `<a class="item-link" href="${item.link}" target="_blank" rel="noopener">${escapeHtml(item.linkLabel || 'Odkaz')} ↗</a>` : ''}
+          <div class="item-due"><span class="badge ${badgeClass}">${badgeText(w, item, status)}</span></div>
+          ${item.hasNote ? `<div class="item-note"><input type="text" placeholder="Poznámka…" value="${escapeHtml(state.note)}" data-action="note-item" data-key="${item.key}"/></div>` : ''}
+          ${emailBlock}
+        </div>
+      </div>`;
+    }).join('');
+    return `<div class="phase"><div class="phase-title">${escapeHtml(phase.phase)}</div>${itemsHtml}</div>`;
+  }).join('');
+}
+
+function renderFinanceTab(w){
+  const shiftsRows = w.finance.shifts.map((s, idx) => `
+    <div class="shift-grid" style="margin-bottom:6px;">
+      <input type="text" placeholder="Obsluha 2× 11:30–22:30" value="${escapeHtml(s.label)}" data-action="fin-shift" data-field="label" data-idx="${idx}"/>
+      <input type="number" min="0" placeholder="lidí" value="${s.people ?? ''}" data-action="fin-shift" data-field="people" data-idx="${idx}"/>
+      <input type="number" min="0" placeholder="h" value="${s.hours ?? ''}" data-action="fin-shift" data-field="hours" data-idx="${idx}"/>
+      <input type="number" min="0" placeholder="Kč/h" value="${s.rate ?? ''}" data-action="fin-shift" data-field="rate" data-idx="${idx}"/>
+      <button class="ghost danger" data-action="fin-remove-shift" data-idx="${idx}">✕</button>
+    </div>`).join('');
+  const flatRows = w.finance.flatItems.map((f, idx) => `
+    <div class="flat-grid" style="margin-bottom:6px;">
+      <input type="text" placeholder="Položka" value="${escapeHtml(f.label)}" data-action="fin-flat" data-field="label" data-idx="${idx}"/>
+      <input type="number" min="0" placeholder="Kč" value="${f.amount ?? ''}" data-action="fin-flat" data-field="amount" data-idx="${idx}"/>
+      <button class="ghost danger" data-action="fin-remove-flat" data-idx="${idx}">✕</button>
+    </div>`).join('');
+  const total = financeTotal(w);
+  return `
+    <div class="card">
+      <div class="section-title">Obsluha (směny)</div>
+      ${shiftsRows || '<div class="muted" style="font-size:12px;margin-bottom:8px;">Žádná směna zatím nezadaná.</div>'}
+      <button class="small" data-action="fin-add-shift" style="margin-top:6px;">+ Přidat směnu</button>
+    </div>
+    <div class="card">
+      <div class="section-title">Ostatní položky</div>
+      ${flatRows || '<div class="muted" style="font-size:12px;margin-bottom:8px;">Žádná položka zatím nezadaná.</div>'}
+      <div class="quickadd">
+        ${FLAT_TEMPLATES.map(t => `<button class="small" data-action="fin-quickadd" data-label="${escapeHtml(t)}">+ ${escapeHtml(t)}</button>`).join('')}
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-title">Celkem</div>
+      <table class="fin"><tbody>
+        <tr class="total"><td>Celkem</td><td class="num">${kc(total)}</td></tr>
+      </tbody></table>
+    </div>
+    <div class="card">
+      <div class="section-title">Zpráva pro pár</div>
+      <textarea id="msg-preview" readonly>${escapeHtml(buildMessageText(w))}</textarea>
+      <div class="send-row">
+        <button data-action="copy-message">Kopírovat text</button>
+        ${w.contactEmail
+          ? `<a class="btn-link" href="mailto:${encodeURIComponent(w.contactEmail)}?subject=${encodeURIComponent('Soupis služeb a doplatků — Dohnalův mlýn')}&body=${encodeURIComponent(buildMessageText(w))}">Otevřít e-mail</a>`
+          : `<button disabled>Otevřít e-mail</button>`}
+        ${w.contactPhone
+          ? `<a class="btn-link" target="_blank" rel="noopener" href="https://wa.me/${w.contactPhone.replace(/[^0-9]/g,'')}?text=${encodeURIComponent(buildMessageText(w))}">Otevřít WhatsApp</a>`
+          : `<button disabled>Otevřít WhatsApp</button>`}
+        ${w.contactEmail && gmailConnected()
+          ? `<button data-action="send-gmail-finance">Odeslat přes Gmail</button>`
+          : ''}
+      </div>
+      <div class="note-small">${gmailConnected() ? 'Gmail je připojen — “Odeslat přes Gmail” pošle zprávu rovnou bez otevírání klienta.' : 'E-mail / WhatsApp se jen otevře předvyplněný — odeslání potvrzuješ ty. Gmail napojíš v nastavení appky nahoře.'}</div>
+    </div>
+  `;
+}
+
+function renderDetail(){
+  const w = weddings.find(x => x.id === view.weddingId);
+  if(!w){ view.mode = 'list'; return renderList(); }
+  const prog = weddingProgress(w);
+  const tabs = [['checklist','Checklist'],['info','Info & lidé'],['finance','Finance']];
+  const tabsHtml = tabs.map(([key,label]) => `<div class="tab ${view.tab===key?'active':''}" data-action="set-tab" data-tab="${key}">${label}</div>`).join('');
+  let tabBody = '';
+  if(view.tab === 'checklist') tabBody = renderChecklistTab(w);
+  else if(view.tab === 'info') tabBody = renderInfoTab(w);
+  else tabBody = renderFinanceTab(w);
+
+  return `
+    <div class="back" data-action="back-to-list">← Zpět na přehled</div>
+    <div class="detail-head">
+      ${wheelSvg(prog.pct, 64)}
+      <div>
+        <div class="detail-title">${escapeHtml(w.coupleName)}</div>
+        <div class="detail-date mono">${fmt(new Date(w.date))} · ${prog.done}/${prog.total} bodů splněno</div>
+        <div class="progress-track" style="width:220px;"><div class="progress-fill" style="width:${prog.pct}%;"></div></div>
+      </div>
+    </div>
+    <div class="tabs">${tabsHtml}</div>
+    ${tabBody}
+  `;
+}
+
+function openNewWeddingModal(){
+  modal = { html: `
+    <div class="modal-bg" data-action="modal-bg">
+      <div class="modal" data-stop>
+        <h2>Nová svatba</h2>
+        <div class="field"><label>Jméno páru</label><input type="text" id="m-couple" placeholder="např. Tereza &amp; Jakub"/></div>
+        <div class="field"><label>Datum svatby</label><input type="date" id="m-date"/></div>
+        <div class="field"><label>Koordinátor</label>
+          <select id="m-coord">${COORDINATORS.map(c => `<option value="${escapeHtml(c)}">${c || '—'}</option>`).join('')}</select>
+        </div>
+        <div class="modal-actions">
+          <button data-action="modal-cancel">Zrušit</button>
+          <button class="primary" data-action="modal-save">Založit</button>
+        </div>
+      </div>
+    </div>` };
+  render();
+  document.getElementById('m-couple').focus();
+}
+
+function attachEvents(){
+  document.querySelectorAll('[data-action]').forEach(el => el.addEventListener('click', onAction));
+  document.querySelectorAll('[data-action="note-item"]').forEach(el => el.addEventListener('change', onNoteChange));
+  document.querySelectorAll('[data-bind]').forEach(el => el.addEventListener('change', onBindChange));
+  document.querySelectorAll('[data-action="fin-shift"]').forEach(el => el.addEventListener('change', onFinShiftChange));
+  document.querySelectorAll('[data-action="fin-flat"]').forEach(el => el.addEventListener('change', onFinFlatChange));
+  const filterEl = document.getElementById('coord-filter');
+  if(filterEl) filterEl.addEventListener('change', e => { coordFilter = e.target.value; render(); });
+  const upcomingEl = document.getElementById('upcoming-filter');
+  if(upcomingEl) upcomingEl.addEventListener('change', e => { upcomingOnly = e.target.checked; render(); });
+  const sigEl = document.getElementById('signature-input');
+  if(sigEl) sigEl.addEventListener('change', e => { settings.signature = e.target.value; persistSettings(); });
+  const clientIdEl = document.getElementById('google-clientid-input');
+  if(clientIdEl) clientIdEl.addEventListener('change', e => {
+    settings.googleClientId = e.target.value.trim();
+    gmailAccessToken = null; gmailTokenExpiresAt = 0;
+    persistSettings();
+    initGis();
+    render();
+  });
+  document.querySelectorAll('[data-action="bind-guestbook-link"]').forEach(el => el.addEventListener('change', e => {
+    const w = currentWedding(); if(!w) return;
+    w.guestbookLink = e.target.value;
+    persist();
+  }));
+  const bg = document.querySelector('[data-action="modal-bg"]');
+  if(bg){
+    bg.addEventListener('click', e => { if(e.target === bg){ modal = null; render(); } });
+    const inner = bg.querySelector('[data-stop]');
+    if(inner) inner.addEventListener('click', e => e.stopPropagation());
+  }
+}
+
+function currentWedding(){ return weddings.find(x => x.id === view.weddingId); }
+
+function onNoteChange(e){
+  const w = currentWedding(); if(!w) return;
+  w.items[e.target.getAttribute('data-key')].note = e.target.value;
+  persist();
+}
+
+function onBindChange(e){
+  const w = currentWedding(); if(!w) return;
+  const field = e.target.getAttribute('data-bind');
+  let val = e.target.value;
+  if(['guests','staffPlanned','rentDeposit','rentBalance'].includes(field)){
+    val = val === '' ? null : Number(val);
+  }
+  w[field] = val;
+  persist();
+  render();
+}
+
+function onFinShiftChange(e){
+  const w = currentWedding(); if(!w) return;
+  const idx = Number(e.target.getAttribute('data-idx'));
+  const field = e.target.getAttribute('data-field');
+  let val = e.target.value;
+  if(field !== 'label') val = val === '' ? null : Number(val);
+  w.finance.shifts[idx][field] = val;
+  persist();
+  render();
+}
+
+function onFinFlatChange(e){
+  const w = currentWedding(); if(!w) return;
+  const idx = Number(e.target.getAttribute('data-idx'));
+  const field = e.target.getAttribute('data-field');
+  let val = e.target.value;
+  if(field === 'amount') val = val === '' ? null : Number(val);
+  w.finance.flatItems[idx][field] = val;
+  persist();
+  render();
+}
+
+async function onAction(e){
+  const action = e.currentTarget.getAttribute('data-action');
+  const id = e.currentTarget.getAttribute('data-id');
+  const w = currentWedding();
+
+  if(action === 'connect-gmail'){
+    try{
+      await ensureGmailToken();
+      render();
+    }catch(err){ alert(err.message); }
+    return;
+  }
+
+  if(action === 'new-wedding'){ openNewWeddingModal(); return; }
+  if(action === 'import-seed'){
+    const added = importSeedWeddings();
+    alert(added > 0 ? `Nahráno ${added} nových svateb.` : 'Všechny svatby ze seedu už jsou založené.');
+    return;
+  }
+  if(action === 'modal-cancel'){ modal = null; render(); return; }
+  if(action === 'modal-save'){
+    const coupleEl = document.getElementById('m-couple');
+    const dateEl = document.getElementById('m-date');
+    const coordEl = document.getElementById('m-coord');
+    const couple = coupleEl.value.trim();
+    const date = dateEl.value;
+    if(!couple || !date){
+      coupleEl.style.borderColor = couple ? 'var(--line)' : 'var(--red)';
+      dateEl.style.borderColor = date ? 'var(--line)' : 'var(--red)';
+      return;
+    }
+    const nw = freshWedding(couple, date);
+    nw.coordinator = coordEl.value;
+    weddings.push(nw);
+    modal = null;
+    persist();
+    render();
+    return;
+  }
+  if(action === 'open-wedding'){ view = { mode:'detail', weddingId:id, tab:'checklist' }; render(); return; }
+  if(action === 'back-to-list'){ view = { mode:'list', weddingId:null, tab:'checklist' }; render(); return; }
+  if(action === 'set-tab'){ view.tab = e.currentTarget.getAttribute('data-tab'); render(); return; }
+  if(action === 'delete-wedding'){
+    e.stopPropagation();
+    if(confirm('Smazat tuto svatbu a celý její checklist?')){
+      weddings = weddings.filter(x => x.id !== id);
+      persist(); render();
+    }
+    return;
+  }
+  if(action === 'toggle-item'){
+    if(!w) return;
+    const key = e.currentTarget.getAttribute('data-key');
+    w.items[key].done = !w.items[key].done;
+    persist(); render();
+    return;
+  }
+  if(!w) return;
+
+  if(action === 'add-name'){
+    const kind = e.currentTarget.getAttribute('data-kind');
+    const inputId = kind === 'serviceNames' ? 'new-service-name' : 'new-cleaning-name';
+    const inp = document.getElementById(inputId);
+    const val = inp.value.trim();
+    if(val){ w[kind].push(val); persist(); render(); }
+    return;
+  }
+  if(action === 'remove-name'){
+    const kind = e.currentTarget.getAttribute('data-kind');
+    const idx = Number(e.currentTarget.getAttribute('data-idx'));
+    w[kind].splice(idx,1);
+    persist(); render();
+    return;
+  }
+  if(action === 'fin-add-shift'){
+    w.finance.shifts.push({ label:'', people:2, hours:8, rate:250 });
+    persist(); render();
+    return;
+  }
+  if(action === 'fin-remove-shift'){
+    w.finance.shifts.splice(Number(e.currentTarget.getAttribute('data-idx')),1);
+    persist(); render();
+    return;
+  }
+  if(action === 'fin-quickadd'){
+    w.finance.flatItems.push({ label: e.currentTarget.getAttribute('data-label'), amount:null });
+    persist(); render();
+    return;
+  }
+  if(action === 'fin-remove-flat'){
+    w.finance.flatItems.splice(Number(e.currentTarget.getAttribute('data-idx')),1);
+    persist(); render();
+    return;
+  }
+  if(action === 'copy-message'){
+    const ta = document.getElementById('msg-preview');
+    ta.select();
+    try{ document.execCommand('copy'); }catch(err){}
+    return;
+  }
+  if(action === 'send-gmail-item'){
+    const key = e.currentTarget.getAttribute('data-key');
+    const item = ALL_ITEMS.find(i => i.key === key);
+    if(!item || !item.email) return;
+    const vars = { coupleName: w.coupleName, link: w.guestbookLink, signature: settings.signature };
+    const subject = fillTemplate(item.email.subject, vars);
+    const body = fillTemplate(item.email.body, vars);
+    e.currentTarget.disabled = true;
+    e.currentTarget.textContent = 'Odesílám…';
+    try{
+      await sendViaGmail(w.contactEmail, subject, body);
+      alert('E-mail byl odeslán přes Gmail.');
+    }catch(err){
+      alert('Odeslání se nezdařilo: ' + err.message);
+    }
+    render();
+    return;
+  }
+  if(action === 'send-gmail-finance'){
+    const subject = 'Soupis služeb a doplatků — Dohnalův mlýn';
+    const body = buildMessageText(w);
+    e.currentTarget.disabled = true;
+    e.currentTarget.textContent = 'Odesílám…';
+    try{
+      await sendViaGmail(w.contactEmail, subject, body);
+      alert('E-mail byl odeslán přes Gmail.');
+    }catch(err){
+      alert('Odeslání se nezdařilo: ' + err.message);
+    }
+    render();
+    return;
+  }
+}
+
+load();
+</script>
+</body>
+</html>
