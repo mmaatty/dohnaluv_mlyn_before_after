@@ -506,8 +506,10 @@ function buildMessageText(w){
   w.finance.flatItems.forEach(f => {
     lines.push(`${f.label || '—'}: ${kc(f.amount||0)}`);
   });
+  if(w.rentBalance !== null && w.rentBalance !== undefined) lines.push(`Doplatek nájmu: ${kc(w.rentBalance)}`);
   lines.push('');
-  lines.push(`Celkem: ${kc(financeTotal(w))}`);
+  const rentTotal = (w.rentBalance || 0);
+  lines.push(`Celkem: ${kc(financeTotal(w) + rentTotal)}`);
   return lines.join('\n');
 }
 
@@ -743,7 +745,6 @@ function renderFinanceTab(w){
       <input type="number" min="0" placeholder="lidí" value="${s.people ?? ''}" data-action="fin-shift" data-field="people" data-idx="${idx}"/>
       <input type="number" min="0" placeholder="h" value="${s.hours ?? ''}" data-action="fin-shift" data-field="hours" data-idx="${idx}"/>
       <input type="number" min="0" placeholder="Kč/h" value="${s.rate ?? ''}" data-action="fin-shift" data-field="rate" data-idx="${idx}"/>
-      <button class="ghost danger" data-action="fin-remove-shift" data-idx="${idx}">✕</button>
     </div>`).join('');
   const flatRows = w.finance.flatItems.map((f, idx) => `
     <div class="flat-grid" style="margin-bottom:6px;">
@@ -755,11 +756,10 @@ function renderFinanceTab(w){
   return `
     <div class="card">
       <div class="section-title">Obsluha (směny)</div>
-      ${w.serviceNames.length > 0 ? `<div class="muted" style="font-size:12px;margin-bottom:8px;">Z Info &amp; lidé: ${escapeHtml(w.serviceNames.join(', '))}</div>` : ''}
+      ${w.staffPlanned ? `<div class="muted" style="font-size:12px;margin-bottom:8px;">Plánovaný počet obsluhy: ${w.staffPlanned}</div>` : ''}
       ${shiftsRows || '<div class="muted" style="font-size:12px;margin-bottom:8px;">Žádná směna zatím nezadaná.</div>'}
       <div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;">
-        <button class="small" data-action="fin-add-shift">+ Přidat směnu</button>
-        ${w.serviceNames.length > 0 ? `<button class="small" data-action="sync-shifts-from-info">↺ Sync z Info &amp; lidé (${w.serviceNames.length} obsluha)</button>` : ''}
+        ${w.staffPlanned ? `<button class="small" data-action="sync-shifts-from-info">↺ Sync z Info &amp; lidé (${w.staffPlanned}×)</button>` : ''}
       </div>
     </div>
     <div class="card">
@@ -959,19 +959,20 @@ async function onAction(e){
   if(action === 'back-to-list'){ view = { mode:'list', weddingId:null, tab:'checklist' }; render(); return; }
   if(action === 'set-tab'){
     view.tab = e.currentTarget.getAttribute('data-tab');
-    if(view.tab === 'finance' && w && w.finance.shifts.length === 0 && w.serviceNames.length > 0){
-      w.serviceNames.forEach((_, i) => {
+    if(view.tab === 'finance' && w && w.finance.shifts.length === 0 && w.staffPlanned > 0){
+      for(let i = 0; i < w.staffPlanned; i++){
         w.finance.shifts.push({ label: `Obsluha ${i+1}`, people: 1, hours: 8, rate: 250 });
-      });
+      }
       persist();
     }
     render(); return;
   }
   if(action === 'sync-shifts-from-info'){
-    if(!w || !w.serviceNames.length) return;
-    w.finance.shifts = w.serviceNames.map((_, i) => ({
-      label: `Obsluha ${i+1}`, people: 1, hours: 8, rate: 250
-    }));
+    if(!w || !w.staffPlanned) return;
+    w.finance.shifts = [];
+    for(let i = 0; i < w.staffPlanned; i++){
+      w.finance.shifts.push({ label: `Obsluha ${i+1}`, people: 1, hours: 8, rate: 250 });
+    }
     persist(); render(); return;
   }
   if(action === 'delete-wedding'){
