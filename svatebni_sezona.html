@@ -185,7 +185,15 @@ const TEMPLATE = [
 
 const ALL_ITEMS = TEMPLATE.flatMap(p => p.items.map(i => ({...i, phase:p.phase})));
 
-const FLAT_TEMPLATES = ['Úklid paušál','Maringotka','Doplatek nájem','Catering','Káva','Pivo + Kofola','Koňský povoz'];
+const FLAT_TEMPLATES = [
+  {label:'Úklid paušál', amount:2500},
+  {label:'Maringotka', amount:4000},
+  {label:'Koňský bar', amount:5000},
+  {label:'Káva', amount:1500},
+  {label:'Doplatek nájem', amount:null},
+  {label:'Catering', amount:null},
+  {label:'Pivo + Kofola', amount:null},
+];
 
 const SEED_WEDDINGS = [
   {date:'2026-04-25',day:'Sobota',coord:'Matěj',staff:4,guests:60,service:['Matěj Dohnal','Petra Pospíšilová','Tereza Puršová','Lenka Helísková'],cleaning:['Petra Grochalová','Petra Pospíšilová','Kamča Zavadilová','Lenka Helísková','Monika Kenša']},
@@ -659,22 +667,6 @@ function renderInfoTab(w){
         <div class="field"><label>Doplatek nájmu (Kč)</label><input type="number" min="0" data-bind="rentBalance" value="${w.rentBalance ?? ''}"/></div>
       </div>
     </div>
-    <div class="card">
-      <div class="section-title">Obsluha — jména</div>
-      ${nameChips(w.serviceNames, 'serviceNames')}
-      <div class="add-name-row">
-        <input type="text" id="new-service-name" placeholder="Jméno a příjmení"/>
-        <button class="small" data-action="add-name" data-kind="serviceNames">Přidat</button>
-      </div>
-    </div>
-    <div class="card">
-      <div class="section-title">Úklid — jména</div>
-      ${nameChips(w.cleaningNames, 'cleaningNames')}
-      <div class="add-name-row">
-        <input type="text" id="new-cleaning-name" placeholder="Jméno a příjmení"/>
-        <button class="small" data-action="add-name" data-kind="cleaningNames">Přidat</button>
-      </div>
-    </div>
   `;
 }
 
@@ -743,7 +735,6 @@ function renderChecklistTab(w){
         <div class="checkbox ${state.done ? 'checked':''}" data-action="toggle-item" data-key="${item.key}">${state.done ? '✓' : ''}</div>
         <div class="item-body">
           <div class="item-label ${state.done?'checked':''}">${escapeHtml(item.label)}</div>
-          ${item.detail ? `<div class="item-detail">${escapeHtml(item.detail)}</div>` : ''}
           ${item.link ? `<a class="item-link" href="${item.link}" target="_blank" rel="noopener">${escapeHtml(item.linkLabel || 'Odkaz')} ↗</a>` : ''}
           <div class="item-due"><span class="badge ${badgeClass}">${badgeText(w, item, status)}</span></div>
           ${item.hasNote ? `<div class="item-note"><input type="text" placeholder="Poznámka…" value="${escapeHtml(state.note)}" data-action="note-item" data-key="${item.key}"/></div>` : ''}
@@ -784,7 +775,7 @@ function renderFinanceTab(w){
       <div class="section-title">Ostatní položky</div>
       ${flatRows || '<div class="muted" style="font-size:12px;margin-bottom:8px;">Žádná položka zatím nezadaná.</div>'}
       <div class="quickadd">
-        ${FLAT_TEMPLATES.map(t => `<button class="small" data-action="fin-quickadd" data-label="${escapeHtml(t)}">+ ${escapeHtml(t)}</button>`).join('')}
+        ${FLAT_TEMPLATES.map(t => `<button class="small" data-action="fin-quickadd" data-label="${escapeHtml(t.label)}" data-amount="${t.amount ?? ''}">+ ${escapeHtml(t.label)}</button>`).join('')}
       </div>
     </div>
     <div class="card">
@@ -1019,7 +1010,8 @@ async function onAction(e){
     return;
   }
   if(action === 'fin-quickadd'){
-    w.finance.flatItems.push({ label: e.currentTarget.getAttribute('data-label'), amount:null });
+    const amt = e.currentTarget.getAttribute('data-amount');
+    w.finance.flatItems.push({ label: e.currentTarget.getAttribute('data-label'), amount: amt ? Number(amt) : null });
     persist(); render();
     return;
   }
