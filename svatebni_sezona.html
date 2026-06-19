@@ -664,17 +664,11 @@ function renderChecklistTab(w){
         const mailHref = canSend
           ? `mailto:${encodeURIComponent(w.contactEmail)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
           : '';
-        const noFinance = w.finance.shifts.length === 0 && w.finance.flatItems.length === 0;
         return `
-        <div class="item-note" style="margin-top:8px;">
-          ${noFinance ? `<div class="note-small" style="margin-bottom:6px;">⚠ Záložka Finance je prázdná — doplň směny a položky, pak se e-mail sestaví automaticky.</div>` : ''}
-          <label>Náhled e-mailu (upravitelný)</label>
-          <textarea id="calc-email-body" style="width:100%;min-height:240px;font-family:'JetBrains Mono',monospace;font-size:12px;white-space:pre-wrap;resize:vertical;">${escapeHtml(body)}</textarea>
-        </div>
         <div class="send-row" style="margin-top:6px;">
           ${canSend
-            ? `<a href="${mailHref}" class="btn-link">Otevřít e-mail</a>`
-            : `<button class="small" disabled>Otevřít e-mail</button><span class="note-small" style="margin:0;">Chybí e-mail páru (záložka Info &amp; lidé)</span>`}
+            ? `<a href="${mailHref}" class="btn-link">Odeslat e-mailem</a>`
+            : `<button class="small" disabled>Odeslat e-mailem</button><span class="note-small" style="margin:0;">Chybí e-mail páru (záložka Info &amp; lidé)</span>`}
           ${canSend && gmailConnected()
             ? `<button class="small" data-action="send-gmail-calc">Odeslat přes Gmail</button>`
             : ''}
