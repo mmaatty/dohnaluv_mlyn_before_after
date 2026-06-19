@@ -171,7 +171,7 @@ const TEMPLATE = [
     { key:'pay_final_invoice', label:'Pošli finální vyúčtování', offset:1, hasNote:true, emailType:'final_invoice' },
     { key:'pay_rent', label:'Doplatek pronájmu dle smlouvy', offset:1,
       link:'https://www.dohnaluvmlyn.cz/qr/', linkLabel:'QR generátor plateb' },
-    { key:'pay_coffee', label:'Úhrada kávy', offset:1, hasNote:true },
+    { key:'pay_coffee', label:'Úhrada kávy', offset:1, hasNote:true, qrImg:'káva.png' },
     { key:'pay_caravan', label:'Úhrada pronájmu maringotky', offset:1, hasNote:true },
     { key:'pay_cart_bar', label:'Úhrada baru z koňského povozu', offset:1, hasNote:true },
     { key:'pay_cleaning', label:'Úhrada závěrečného úklidu', offset:1, hasNote:true },
@@ -747,6 +747,7 @@ function renderChecklistTab(w){
           ${item.link ? `<a class="item-link" href="${item.link}" target="_blank" rel="noopener">${escapeHtml(item.linkLabel || 'Odkaz')} ↗</a>` : ''}
           <div class="item-due"><span class="badge ${badgeClass}">${badgeText(w, item, status)}</span></div>
           ${item.hasNote ? `<div class="item-note"><input type="text" placeholder="Poznámka…" value="${escapeHtml(state.note)}" data-action="note-item" data-key="${item.key}"/></div>` : ''}
+          ${item.qrImg ? `<div style="margin-top:8px;"><img src="${escapeHtml(item.qrImg)}" alt="QR platba" style="width:180px;height:180px;display:block;border-radius:8px;"/></div>` : ''}
           ${finalInvoiceBlock}
           ${calcEmailBlock}
           ${emailBlock}
