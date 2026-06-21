@@ -187,15 +187,14 @@ const TEMPLATE = [
         body:'Dobrý den,\n\nníže posíláme knihu hostů, prosíme vás o včasné vyplnění.\n\n{link}\n\nHezký den,\n{signature}'
       } },
     { key:'calculation', label:'Zaslat předběžnou kalkulaci za služby', offset:-7, hasNote:true, emailType:'calculation' },
-    { key:'tarps', label:'Potvrdit plachty a koňobar Vojtovi / Grochymu', offset:-2 },
   ]},
   { phase: 'Platby po svatbě', items: [
     { key:'pay_final_invoice', label:'Pošli finální vyúčtování', offset:1, hasNote:true, emailType:'final_invoice' },
     { key:'pay_rent', label:'Doplatek pronájmu dle smlouvy', offset:1,
       link:'https://www.dohnaluvmlyn.cz/qr/', linkLabel:'QR generátor plateb' },
-    { key:'pay_coffee', label:'Úhrada kávy', offset:1, hasNote:true },
-    { key:'pay_caravan', label:'Úhrada pronájmu maringotky', offset:1, hasNote:true },
-    { key:'pay_cart_bar', label:'Úhrada baru z koňského povozu', offset:1, hasNote:true },
+    { key:'pay_coffee', label:'Úhrada kávy', offset:1, hasNote:true, qrImg:'káva.png' },
+    { key:'pay_caravan', label:'Úhrada pronájmu maringotky', offset:1, hasNote:true, qrImg:'maringotka.png' },
+    { key:'pay_cart_bar', label:'Úhrada baru z koňského povozu', offset:1, hasNote:true, qrImg:'koňský bar.png' },
     { key:'pay_cleaning', label:'Úhrada závěrečného úklidu', offset:1, hasNote:true },
     { key:'pay_staff', label:'Úhrada obsluhy', offset:1, hasNote:true },
   ]},
@@ -797,6 +796,7 @@ function renderChecklistTab(w){
         <div class="item-body">
           <div class="item-label ${state.done?'checked':''}">${escapeHtml(item.label)}</div>
           ${item.link ? `<a class="item-link" href="${item.link}" target="_blank" rel="noopener">${escapeHtml(item.linkLabel || 'Odkaz')} ↗</a>` : ''}
+          ${item.qrImg ? `<div style="margin-top:6px;"><button class="small" data-action="show-qr" data-img="${escapeHtml(item.qrImg)}" data-label="${escapeHtml(item.label)}">Zobrazit QR</button></div>` : ''}
           ${finalInvoiceBlock}
           ${calcEmailBlock}
           ${thankYouEmailBlock}
@@ -1045,6 +1045,22 @@ async function onAction(e){
       weddings = weddings.filter(x => x.id !== id);
       persist(); render();
     }
+    return;
+  }
+  if(action === 'show-qr'){
+    const img = e.currentTarget.getAttribute('data-img');
+    const label = e.currentTarget.getAttribute('data-label');
+    modal = { html: `
+      <div class="modal-bg" data-action="close-modal">
+        <div class="modal" style="text-align:center;max-width:320px;" onclick="event.stopPropagation()">
+          <h2>${escapeHtml(label)}</h2>
+          <img src="${escapeHtml(img)}" alt="QR kód" style="width:100%;border-radius:8px;display:block;"/>
+          <div class="modal-actions" style="justify-content:center;margin-top:14px;">
+            <button data-action="close-modal">Zavřít</button>
+          </div>
+        </div>
+      </div>` };
+    render();
     return;
   }
   if(action === 'toggle-item'){
