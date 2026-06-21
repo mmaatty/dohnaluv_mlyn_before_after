@@ -324,6 +324,7 @@ function migrate(w){
   if(!w.finance) w.finance = { shifts:[], flatItems:[] };
   if(!w.sentAutomations) w.sentAutomations = {};
   ALL_ITEMS.forEach(i => { if(!w.items[i.key]) w.items[i.key] = { done:false, note:'' }; });
+  AUTOMATIONS.forEach(a => { if(a.itemKey && w.sentAutomations[a.key] && w.items[a.itemKey]) w.items[a.itemKey].done = true; });
   return w;
 }
 
