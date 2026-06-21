@@ -87,7 +87,8 @@ label{font-size:11px;color:var(--paper-dim);display:block;margin-bottom:4px;text
 .item:last-child{border-bottom:none;}
 .checkbox{width:18px;height:18px;border-radius:4px;border:1.5px solid var(--paper-dim);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;}
 .checkbox.checked{background:var(--green);border-color:var(--green);color:#1b2614;}
-.item-body{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.item-body{display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap;flex-direction:column;}
+.item-body-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
 .item-label{font-size:13px;}
 .item-label.checked{color:var(--paper-dim);text-decoration:line-through;}
 .item-link{font-size:12px;color:var(--water);text-decoration:none;}
@@ -827,10 +828,13 @@ function renderChecklistTab(w){
       <div class="item">
         <div class="checkbox ${state.done ? 'checked':''}" data-action="toggle-item" data-key="${item.key}">${state.done ? '✓' : ''}</div>
         <div class="item-body">
-          <span class="item-label ${state.done?'checked':''}">${escapeHtml(item.label)}</span>${sentTs}
-          ${item.link ? `<a class="item-link" href="${item.link}" target="_blank" rel="noopener">${escapeHtml(item.linkLabel || 'Odkaz')} ↗</a>` : ''}
+          <div class="item-body-row">
+            <span class="item-label ${state.done?'checked':''}">${escapeHtml(item.label)}</span>${sentTs}
+            ${item.link ? `<a class="item-link" href="${item.link}" target="_blank" rel="noopener">${escapeHtml(item.linkLabel || 'Odkaz')} ↗</a>` : ''}
+            ${item.qrImg ? `<a class="item-link" href="${escapeHtml(item.qrImg)}" target="_blank" rel="noopener">QR platba ↗</a>` : ''}
+          </div>
+          ${(item.emailType || item.email) ? `<div style="font-size:11px;color:var(--paper-dim);">Termín: ${fmt(itemDueDate(w, item))}</div>` : ''}
           ${guestbookBlock}
-          ${item.qrImg ? `<div style="margin-top:6px;"><button class="small" data-action="show-qr" data-img="${escapeHtml(item.qrImg)}" data-label="${escapeHtml(item.label)}">Zobrazit QR</button></div>` : ''}
         </div>
         <div class="item-actions">${actionBtn}</div>
       </div>`;
