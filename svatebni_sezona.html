@@ -738,12 +738,9 @@ function renderChecklistTab(w){
           : '';
         return `
         <div class="send-row" style="margin-top:6px;">
-          ${canSend
-            ? `<a href="${mailHref}" class="btn-link">Odeslat e-mailem</a>`
-            : `<button class="small" disabled>Odeslat e-mailem</button><span class="note-small" style="margin:0;">Chybí e-mail páru (záložka Info &amp; lidé)</span>`}
           ${canSend && gmailConnected()
             ? `<button class="small" data-action="send-gmail-final-invoice">Odeslat přes Gmail</button>`
-            : ''}
+            : `<button class="small" disabled>Odeslat přes Gmail</button><span class="note-small" style="margin:0;">${!w.contactEmail ? 'Chybí e-mail páru (záložka Info &amp; lidé)' : 'Gmail není připojen'}</span>`}
         </div>`;
       })() : '';
       const thankYouEmailBlock = item.emailType === 'thank_you' ? (() => {
@@ -755,12 +752,9 @@ function renderChecklistTab(w){
           : '';
         return `
         <div class="send-row" style="margin-top:6px;">
-          ${canSend
-            ? `<a href="${mailHref}" class="btn-link">Odeslat e-mailem</a>`
-            : `<button class="small" disabled>Odeslat e-mailem</button><span class="note-small" style="margin:0;">Chybí e-mail páru (záložka Info &amp; lidé)</span>`}
           ${canSend && gmailConnected()
             ? `<button class="small" data-action="send-gmail-thank-you">Odeslat přes Gmail</button>`
-            : ''}
+            : `<button class="small" disabled>Odeslat přes Gmail</button><span class="note-small" style="margin:0;">${!w.contactEmail ? 'Chybí e-mail páru (záložka Info &amp; lidé)' : 'Gmail není připojen'}</span>`}
         </div>`;
       })() : '';
       const calcEmailBlock = item.emailType === 'calculation' ? (() => {
@@ -772,12 +766,9 @@ function renderChecklistTab(w){
           : '';
         return `
         <div class="send-row" style="margin-top:6px;">
-          ${canSend
-            ? `<a href="${mailHref}" class="btn-link">Odeslat e-mailem</a>`
-            : `<button class="small" disabled>Odeslat e-mailem</button><span class="note-small" style="margin:0;">Chybí e-mail páru (záložka Info &amp; lidé)</span>`}
           ${canSend && gmailConnected()
             ? `<button class="small" data-action="send-gmail-calc">Odeslat přes Gmail</button>`
-            : ''}
+            : `<button class="small" disabled>Odeslat přes Gmail</button><span class="note-small" style="margin:0;">${!w.contactEmail ? 'Chybí e-mail páru (záložka Info &amp; lidé)' : 'Gmail není připojen'}</span>`}
         </div>`;
       })() : '';
       const emailBlock = item.email ? (() => {
@@ -792,12 +783,9 @@ function renderChecklistTab(w){
           <input type="text" placeholder="https://docs.google.com/..." value="${escapeHtml(w.guestbookLink)}" data-action="bind-guestbook-link" data-key="${item.key}"/>
         </div>
         <div class="send-row" style="margin-top:6px;">
-          ${canSend
-            ? `<a href="${mailHref}" class="btn-link">Odeslat e-mailem</a>`
-            : `<button class="small" disabled>Odeslat e-mailem</button><span class="note-small" style="margin:0;">Chybí ${!w.contactEmail ? 'e-mail páru (záložka Info &amp; lidé)' : 'konkrétní odkaz'}</span>`}
           ${canSend && gmailConnected()
             ? `<button class="small" data-action="send-gmail-item" data-key="${item.key}">Odeslat přes Gmail</button>`
-            : ''}
+            : `<button class="small" disabled>Odeslat přes Gmail</button><span class="note-small" style="margin:0;">${!w.contactEmail ? 'Chybí e-mail páru (záložka Info &amp; lidé)' : !w.guestbookLink ? 'Chybí konkrétní odkaz' : 'Gmail není připojen'}</span>`}
         </div>`;
       })() : '';
       return `
@@ -859,12 +847,6 @@ function renderFinanceTab(w){
       <textarea id="msg-preview" readonly>${escapeHtml(buildMessageText(w))}</textarea>
       <div class="send-row">
         <button data-action="copy-message">Kopírovat text</button>
-        ${w.contactEmail
-          ? `<a class="btn-link" href="mailto:${encodeURIComponent(w.contactEmail)}?subject=${encodeURIComponent('Soupis služeb a doplatků — Dohnalův mlýn')}&body=${encodeURIComponent(buildMessageText(w))}">Otevřít e-mail</a>`
-          : `<button disabled>Otevřít e-mail</button>`}
-        ${w.contactPhone
-          ? `<a class="btn-link" target="_blank" rel="noopener" href="https://wa.me/${w.contactPhone.replace(/[^0-9]/g,'')}?text=${encodeURIComponent(buildMessageText(w))}">Otevřít WhatsApp</a>`
-          : `<button disabled>Otevřít WhatsApp</button>`}
         ${w.contactEmail && gmailConnected()
           ? `<button data-action="send-gmail-finance">Odeslat přes Gmail</button>`
           : ''}
