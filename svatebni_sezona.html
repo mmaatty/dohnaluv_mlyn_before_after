@@ -1099,7 +1099,7 @@ async function onAction(e){
     render();
     return;
   }
-  if(action === 'open-wedding'){ view = { mode:'detail', weddingId:id, tab:'checklist' }; render(); return; }
+  if(action === 'open-wedding'){ view = { mode:'detail', weddingId:id, tab:'info' }; render(); return; }
   if(action === 'back-to-list'){ view = { mode:'list', weddingId:null, tab:'checklist' }; render(); return; }
   if(action === 'set-tab'){
     view.tab = e.currentTarget.getAttribute('data-tab');
