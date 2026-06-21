@@ -816,12 +816,17 @@ function renderChecklistTab(w){
             ? `<button class="small" data-action="send-gmail-item" data-key="${item.key}">Gmail ↗</button>`
             : `<button class="small" disabled title="${!w.contactEmail ? 'Chybí e-mail páru' : !w.guestbookLink ? 'Chybí odkaz' : 'Gmail není připojen'}">Gmail ↗</button>`}`;
       })() : '';
+      const AUTO_KEY_MAP = { 'guestbook': 'auto_guestbook', 'calculation': 'auto_calculation', 'final_invoice': 'auto_final_invoice', 'thank_you': 'auto_thank_you' };
+      const autoKey = item.emailType ? AUTO_KEY_MAP[item.emailType] : (item.email ? 'auto_guestbook' : null);
+      const sentTs = autoKey && w.sentAutomations && w.sentAutomations[autoKey]
+        ? `<span style="font-size:10px;color:var(--green);margin-left:8px;">✓ odesláno ${new Date(w.sentAutomations[autoKey]).toLocaleDateString('cs-CZ')}</span>`
+        : '';
       const actionBtn = finalInvoiceBtn || calcEmailBtn || thankYouEmailBtn;
       return `
       <div class="item">
         <div class="checkbox ${state.done ? 'checked':''}" data-action="toggle-item" data-key="${item.key}">${state.done ? '✓' : ''}</div>
         <div class="item-body">
-          <span class="item-label ${state.done?'checked':''}">${escapeHtml(item.label)}</span>
+          <span class="item-label ${state.done?'checked':''}">${escapeHtml(item.label)}</span>${sentTs}
           ${item.link ? `<a class="item-link" href="${item.link}" target="_blank" rel="noopener">${escapeHtml(item.linkLabel || 'Odkaz')} ↗</a>` : ''}
           ${guestbookBlock}
           ${item.qrImg ? `<a class="item-link" href="${escapeHtml(item.qrImg)}" target="_blank" rel="noopener">QR platba ↗</a>` : ''}
