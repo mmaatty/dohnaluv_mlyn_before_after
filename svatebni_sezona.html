@@ -125,9 +125,29 @@ textarea#msg-preview{width:100%;min-height:220px;font-family:'JetBrains Mono',mo
 <div class="wrap" id="app"></div>
 
 <script src="https://accounts.google.com/gsi/client" async defer onload="window.__gisLoaded=true; if(window.onGisReady) window.onGisReady();"></script>
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js';
+import { getDatabase, ref, get, set } from 'https://www.gstatic.com/firebasejs/11.9.0/firebase-database.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyD65aSlc71YlikBsIo6vumKqmggI6NbbGM",
+  authDomain: "dohnaluv-mlyn.firebaseapp.com",
+  databaseURL: "https://dohnaluv-mlyn-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "dohnaluv-mlyn",
+  storageBucket: "dohnaluv-mlyn.firebasestorage.app",
+  messagingSenderId: "804865428309",
+  appId: "1:804865428309:web:0ad57459d89f7d18b63ddc"
+};
+const fbApp = initializeApp(firebaseConfig);
+const db = getDatabase(fbApp);
+
+window.__fbGet = (path) => get(ref(db, path)).then(snap => snap.exists() ? snap.val() : null);
+window.__fbSet = (path, val) => set(ref(db, val === null ? path : path), val);
+window.__fbSetPath = (path, val) => set(ref(db, path), val);
+</script>
 <script>
-const STORAGE_KEY = 'weddings';
-const SETTINGS_KEY = 'app_settings';
+const STORAGE_KEY = 'svatebni_sezona/weddings';
+const SETTINGS_KEY = 'svatebni_sezona/settings';
 let settings = { signature: 'Matěj Dohnal', googleClientId: '820713565157-t00k6cd33mi1d51e8fhedlddedku0jfa.apps.googleusercontent.com' };
 
 const COORDINATORS = ['', 'Honza + Verča', 'Matěj', 'Grochy', 'Eliška a Vojta'];
@@ -279,28 +299,34 @@ function migrate(w){
 
 async function load(){
   try{
-    const raw = localStorage.getItem(STORAGE_KEY);
-    weddings = raw ? JSON.parse(raw).map(migrate) : [];
-  }catch(e){
-    weddings = [];
-  }
+    const fbGet = window.__fbGet || (() => Promise.resolve(null));
+    const data = await fbGet(STORAGE_KEY);
+    weddings = data ? (Array.isArray(data) ? data : Object.values(data)).map(migrate) : [];
+  }catch(e){ weddings = []; }
   if(weddings.length === 0) importSeedWeddings();
   try{
-    const raw2 = localStorage.getItem(SETTINGS_KEY);
-    if(raw2) settings = { ...settings, ...JSON.parse(raw2) };
+    const fbGet = window.__fbGet || (() => Promise.resolve(null));
+    const s = await fbGet(SETTINGS_KEY);
+    if(s) settings = { ...settings, ...s };
   }catch(e){}
   initGis();
   render();
 }
 
 async function persist(){
-  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(weddings)); }
-  catch(e){ console.error('Uložení se nezdařilo', e); }
+  try{
+    const fbSetPath = window.__fbSetPath || (() => Promise.resolve());
+    const obj = {};
+    weddings.forEach(w => { obj[w.id] = w; });
+    await fbSetPath(STORAGE_KEY, obj);
+  }catch(e){ console.error('Uložení se nezdařilo', e); }
 }
 
 async function persistSettings(){
-  try{ localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); }
-  catch(e){ console.error('Uložení nastavení se nezdařilo', e); }
+  try{
+    const fbSetPath = window.__fbSetPath || (() => Promise.resolve());
+    await fbSetPath(SETTINGS_KEY, settings);
+  }catch(e){ console.error('Uložení nastavení se nezdařilo', e); }
 }
 
 function fillTemplate(tpl, vars){
