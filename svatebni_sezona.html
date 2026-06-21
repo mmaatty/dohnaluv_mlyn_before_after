@@ -303,6 +303,13 @@ function freshWedding(coupleName, date){
   };
 }
 
+const AUTOMATIONS = [
+  { key:'auto_guestbook',     offsetDays:-60, label:'Kniha hostů',           emailType:'guestbook' },
+  { key:'auto_calculation',   offsetDays:-14, label:'Předběžná kalkulace',    emailType:'calculation' },
+  { key:'auto_final_invoice', offsetDays:1,   label:'Finální vyúčtování',     emailType:'final_invoice' },
+  { key:'auto_thank_you',     offsetDays:7,   label:'Děkovný e-mail',         emailType:'thank_you' },
+];
+
 function migrate(w){
   if(!w.coordinator) w.coordinator = '';
   if(w.guests === undefined) w.guests = null;
@@ -315,8 +322,63 @@ function migrate(w){
   if(w.rentBalance === undefined) w.rentBalance = null;
   if(w.guestbookLink === undefined) w.guestbookLink = '';
   if(!w.finance) w.finance = { shifts:[], flatItems:[] };
+  if(!w.sentAutomations) w.sentAutomations = {};
   ALL_ITEMS.forEach(i => { if(!w.items[i.key]) w.items[i.key] = { done:false, note:'' }; });
   return w;
+}
+
+function getAutomationEmailBody(w, emailType){
+  if(emailType === 'guestbook'){
+    const vars = { coupleName: w.coupleName, link: w.guestbookLink, signature: settings.signature };
+    return { subject: fillTemplate('Kniha hostů – {coupleName}', vars), body: fillTemplate('Dobrý den,\n\nníže posíláme knihu hostů, prosíme vás o včasné vyplnění.\n\n{link}\n\nHezký den,\n{signature}', vars) };
+  }
+  if(emailType === 'calculation') return { subject: `Předběžná kalkulace — ${w.coupleName}`, body: buildPreliminaryCalcEmailBody(w) };
+  if(emailType === 'final_invoice') return { subject: `Finální vyúčtování — ${w.coupleName}`, body: buildFinalInvoiceEmailBody(w) };
+  if(emailType === 'thank_you') return { subject: `Děkujeme za vaši svatbu na Dohnalově mlýně`, body: buildThankYouEmailBody(w) };
+  return null;
+}
+
+function collectPendingAutomations(){
+  const today = todayMid();
+  const pending = [];
+  weddings.forEach(w => {
+    if(!w.contactEmail) return;
+    const wDate = dateOnly(w.date);
+    AUTOMATIONS.forEach(a => {
+      if(w.sentAutomations[a.key]) return;
+      const triggerDate = addDays(wDate, a.offsetDays);
+      if(triggerDate <= today){
+        if(a.emailType === 'guestbook' && !w.guestbookLink) return;
+        pending.push({ w, a });
+      }
+    });
+  });
+  return pending;
+}
+
+function showAutomationPrompt(pending){
+  if(!pending.length) return;
+  const rows = pending.map((p, idx) => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);">
+      <div>
+        <div style="font-size:13px;font-weight:500;">${escapeHtml(p.w.coupleName)}</div>
+        <div style="font-size:11px;color:var(--paper-dim);">${escapeHtml(p.a.label)} · ${escapeHtml(p.w.contactEmail)}</div>
+      </div>
+      <button class="small" data-action="auto-send-one" data-idx="${idx}">Odeslat</button>
+    </div>`).join('');
+  modal = { pending, html: `
+    <div class="modal-bg" data-action="modal-bg">
+      <div class="modal" style="width:460px;" data-stop>
+        <h2>Automatické e-maily k odeslání</h2>
+        <div style="margin-bottom:14px;font-size:12px;color:var(--paper-dim);">Následující e-maily jsou naplánované a dosud nebyly odeslány.</div>
+        ${rows}
+        <div class="modal-actions">
+          <button data-action="modal-cancel">Zavřít</button>
+          <button class="primary" data-action="auto-send-all">Odeslat vše (${pending.length})</button>
+        </div>
+      </div>
+    </div>` };
+  render();
 }
 
 async function load(){
@@ -333,6 +395,8 @@ async function load(){
   }catch(e){}
   initGis();
   render();
+  const pending = collectPendingAutomations();
+  if(pending.length) showAutomationPrompt(pending);
 }
 
 async function persist(){
@@ -681,6 +745,7 @@ function renderList(){
     </div>
     <div style="margin-bottom:16px;display:flex;gap:8px;">
       <button class="primary" data-action="new-wedding">+ Nová svatba</button>
+      <button data-action="check-automations">Zkontrolovat automatické e-maily</button>
     </div>
     ${all.length > 0 ? filterHtml : ''}
     ${body}
@@ -954,12 +1019,62 @@ async function onAction(e){
   }
 
   if(action === 'new-wedding'){ openNewWeddingModal(); return; }
+  if(action === 'check-automations'){
+    const pending = collectPendingAutomations();
+    if(pending.length) showAutomationPrompt(pending);
+    else alert('Žádné automatické e-maily k odeslání.');
+    return;
+  }
   if(action === 'import-seed'){
     const added = importSeedWeddings();
     alert(added > 0 ? `Nahráno ${added} nových svateb.` : 'Všechny svatby ze seedu už jsou založené.');
     return;
   }
   if(action === 'modal-cancel'){ modal = null; render(); return; }
+
+  if(action === 'auto-send-one'){
+    const idx = Number(e.currentTarget.getAttribute('data-idx'));
+    const pending = modal.pending;
+    if(!pending || !pending[idx]) return;
+    const { w, a } = pending[idx];
+    const email = getAutomationEmailBody(w, a.emailType);
+    if(!email) return;
+    e.currentTarget.disabled = true;
+    e.currentTarget.textContent = 'Odesílám…';
+    try{
+      await sendViaGmail(w.contactEmail, email.subject, email.body);
+      w.sentAutomations[a.key] = new Date().toISOString();
+      await persist();
+      pending.splice(idx, 1);
+      if(pending.length === 0){ modal = null; render(); }
+      else showAutomationPrompt(pending);
+    }catch(err){
+      alert('Odeslání se nezdařilo: ' + err.message);
+      render();
+    }
+    return;
+  }
+
+  if(action === 'auto-send-all'){
+    const pending = modal.pending;
+    if(!pending || !pending.length) return;
+    e.currentTarget.disabled = true;
+    e.currentTarget.textContent = 'Odesílám…';
+    const errors = [];
+    for(const { w, a } of pending){
+      const email = getAutomationEmailBody(w, a.emailType);
+      if(!email) continue;
+      try{
+        await sendViaGmail(w.contactEmail, email.subject, email.body);
+        w.sentAutomations[a.key] = new Date().toISOString();
+      }catch(err){ errors.push(`${w.coupleName} / ${a.label}: ${err.message}`); }
+    }
+    await persist();
+    modal = null;
+    render();
+    if(errors.length) alert('Některé e-maily se nepodařilo odeslat:\n' + errors.join('\n'));
+    return;
+  }
   if(action === 'modal-save'){
     const coupleEl = document.getElementById('m-couple');
     const dateEl = document.getElementById('m-date');
