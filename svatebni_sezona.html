@@ -122,32 +122,58 @@ textarea#msg-preview{width:100%;min-height:220px;font-family:'JetBrains Mono',mo
 </style>
 </head>
 <body>
-<div class="wrap" id="app"></div>
+<div id="login-screen" style="display:none;position:fixed;inset:0;background:var(--bg);align-items:center;justify-content:center;z-index:100;">
+  <div style="background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:32px 28px;width:340px;max-width:90vw;">
+    <div class="brand" style="margin-bottom:6px;">Dohnalův mlýn</div>
+    <h1 style="margin-bottom:24px;">Přihlášení</h1>
+    <div class="field"><label>E-mail</label><input type="email" id="login-email" placeholder="email@example.com"/></div>
+    <div class="field"><label>Heslo</label><input type="password" id="login-password" placeholder="••••••••"/></div>
+    <div id="login-error" style="color:var(--red);font-size:12px;margin-bottom:10px;display:none;"></div>
+    <button class="primary" id="login-btn" style="width:100%;margin-top:4px;">Přihlásit se</button>
+  </div>
+</div>
+<div class="wrap" id="app" style="display:none;"></div>
 
 <script src="https://accounts.google.com/gsi/client" async defer onload="window.__gisLoaded=true; if(window.onGisReady) window.onGisReady();"></script>
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js';
 import { getDatabase, ref, get, set } from 'https://www.gstatic.com/firebasejs/11.9.0/firebase-database.js';
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyD65aSlc71YlikBsIo6vumKqmggI6NbbGM",
-  authDomain: "dohnaluv-mlyn.firebaseapp.com",
-  databaseURL: "https://dohnaluv-mlyn-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "dohnaluv-mlyn",
-  storageBucket: "dohnaluv-mlyn.firebasestorage.app",
-  messagingSenderId: "804865428309",
-  appId: "1:804865428309:web:0ad57459d89f7d18b63ddc"
+  apiKey: "AIzaSyAIsrTCjW8R9x8BoASjx3w5VvrjJ67az-A",
+  authDomain: "mlynbeforeafter.firebaseapp.com",
+  databaseURL: "https://mlynbeforeafter-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "mlynbeforeafter",
+  storageBucket: "mlynbeforeafter.firebasestorage.app",
+  messagingSenderId: "875841523149",
+  appId: "1:875841523149:web:94d0f33ec79898b9548884"
 };
+
 const fbApp = initializeApp(firebaseConfig);
 const db = getDatabase(fbApp);
+const auth = getAuth(fbApp);
 
 window.__fbGet = (path) => get(ref(db, path)).then(snap => snap.exists() ? snap.val() : null);
-window.__fbSet = (path, val) => set(ref(db, val === null ? path : path), val);
 window.__fbSetPath = (path, val) => set(ref(db, path), val);
+
+window.__fbLogin = (email, password) => signInWithEmailAndPassword(auth, email, password);
+window.__fbLogout = () => signOut(auth);
+
+onAuthStateChanged(auth, user => {
+  if(user){
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    if(window.__onLogin) window.__onLogin();
+  } else {
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('app').style.display = 'none';
+  }
+});
 </script>
 <script>
-const STORAGE_KEY = 'svatebni_sezona/weddings';
-const SETTINGS_KEY = 'svatebni_sezona/settings';
+const STORAGE_KEY = 'weddings';
+const SETTINGS_KEY = 'settings';
 let settings = { signature: 'Matěj Dohnal', googleClientId: '820713565157-t00k6cd33mi1d51e8fhedlddedku0jfa.apps.googleusercontent.com' };
 
 const COORDINATORS = ['', 'Honza + Verča', 'Matěj', 'Grochy', 'Eliška a Vojta'];
@@ -633,7 +659,10 @@ function renderList(){
     }).join('');
   }
   return `
-    <span class="brand">Dohnalův mlýn</span>
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <span class="brand">Dohnalův mlýn</span>
+      <button class="ghost small" onclick="window.__fbLogout && window.__fbLogout()">Odhlásit</button>
+    </div>
     <h1>Svatební sezóna</h1>
     <div class="field" style="max-width:280px;margin-bottom:16px;">
       <label>Podpis v generovaných e-mailech</label>
@@ -1162,7 +1191,32 @@ async function onAction(e){
   }
 }
 
-load();
+window.__onLogin = load;
+
+document.addEventListener('DOMContentLoaded', () => {
+  const btn = document.getElementById('login-btn');
+  const errEl = document.getElementById('login-error');
+  if(btn){
+    btn.addEventListener('click', async () => {
+      const email = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value;
+      errEl.style.display = 'none';
+      btn.disabled = true;
+      btn.textContent = 'Přihlašuji…';
+      try{
+        await window.__fbLogin(email, password);
+      }catch(e){
+        errEl.textContent = 'Špatný e-mail nebo heslo.';
+        errEl.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'Přihlásit se';
+      }
+    });
+    document.getElementById('login-password').addEventListener('keydown', e => {
+      if(e.key === 'Enter') btn.click();
+    });
+  }
+});
 </script>
 </body>
 </html>
