@@ -473,63 +473,66 @@ const CALC_LABEL_MAP = {
   'Koňský povoz': 'Koňský bar',
 };
 
-function buildPreliminaryCalcEmailBody(w){
-  const parts = [];
-  parts.push('Dobrý den,\n\nv příloze/níže Vám zasílám předběžnou kalkulaci svatby.');
+function flatItemLine(f){
+  const rawLabel = f.label || '';
+  const sectionName = CALC_LABEL_MAP[rawLabel] || rawLabel;
+  if(rawLabel.toLowerCase().includes('catering')){
+    return `Catering: finální kalkulace Vám byla zaslána paní Válkovou`;
+  }
+  const amtStr = (f.amount !== null && f.amount !== undefined) ? kc(f.amount) : '[částka]';
+  return `${sectionName}: ${amtStr}`;
+}
 
-  // Obsluha from shifts
-  if(w.finance.shifts.length > 0){
-    const s = w.finance.shifts[0];
-    const people = s.people || 4;
-    const rate = s.rate || 250;
-    parts.push(`Obsluha\n\n${people} ${people === 1 ? 'osoba' : people < 5 ? 'osoby' : 'osob'}\nhodinová sazba ${rate} Kč/osoba\nfinální částka bude vyúčtována dle skutečně odpracovaných hodin`);
+function buildPreliminaryCalcEmailBody(w){
+  const lines = [];
+  lines.push('Dobrý den,');
+  lines.push('');
+  lines.push('v příloze/níže Vám zasílám předběžnou kalkulaci svatby.');
+  lines.push('');
+
+  const people = w.staffPlanned || (w.finance.shifts[0] && w.finance.shifts[0].people) || 0;
+  if(people){
+    const pLabel = people === 1 ? 'osoba' : people < 5 ? 'osoby' : 'osob';
+    lines.push(`Obsluha: ${people} ${pLabel}`);
+    lines.push('hodinová sazba 250 Kč/osoba');
+    lines.push('finální částka bude vyúčtována dle skutečně odpracovaných hodin');
+    lines.push('');
   }
 
-  // Flat items
-  w.finance.flatItems.forEach(f => {
-    const rawLabel = f.label || '';
-    const sectionName = CALC_LABEL_MAP[rawLabel] || rawLabel;
-    if(rawLabel.toLowerCase().includes('catering')){
-      parts.push('Catering\n\nfinální kalkulace Vám byla zaslána paní Válkovou');
-    } else {
-      const amtStr = (f.amount !== null && f.amount !== undefined) ? kc(f.amount) : '[částka]';
-      parts.push(`${sectionName}\n\n${amtStr}`);
-    }
-  });
+  w.finance.flatItems.forEach(f => lines.push(flatItemLine(f)));
 
-  parts.push('Jedná se o předběžnou kalkulaci. Konečné vyúčtování bude upřesněno po akci dle skutečně poskytnutých služeb a odpracovaných hodin.');
-  parts.push(`Hezký den,\n${settings.signature}`);
-  return parts.join('\n\n');
+  if(w.finance.flatItems.length > 0) lines.push('');
+  lines.push('Jedná se o předběžnou kalkulaci. Konečné vyúčtování bude upřesněno po akci dle skutečně poskytnutých služeb a odpracovaných hodin.');
+  lines.push('');
+  lines.push(`Hezký den,\n${settings.signature}`);
+  return lines.join('\n');
 }
 
 function buildFinalInvoiceEmailBody(w){
-  const parts = [];
-  parts.push('Dobrý den,\n\nv příloze/níže Vám zasílám finální vyúčtování svatby.');
+  const lines = [];
+  lines.push('Dobrý den,');
+  lines.push('');
+  lines.push('v příloze/níže Vám zasílám finální vyúčtování svatby.');
+  lines.push('');
 
-  // Obsluha from shifts - exact amount
   if(w.finance.shifts.length > 0){
-    const s = w.finance.shifts[0];
-    const people = s.people || 0;
-    const hours = s.hours || 0;
-    const rate = s.rate || 250;
-    const amount = people * hours * rate;
-    parts.push(`Obsluha\n\n${people} ${people === 1 ? 'osoba' : people < 5 ? 'osoby' : 'osob'}\nhodinová sazba ${rate} Kč/osoba\ncelkem ${kc(amount)}`);
+    const totalPeople = w.finance.shifts.reduce((s,x) => s + (x.people||0), 0);
+    const pLabel = totalPeople === 1 ? 'osoba' : totalPeople < 5 ? 'osoby' : 'osob';
+    lines.push(`Obsluha: ${totalPeople} ${pLabel}`);
+    w.finance.shifts.forEach(s => {
+      const amount = (s.people||0)*(s.hours||0)*(s.rate||0);
+      lines.push(`${s.label || 'Obsluha'}: ${s.people||0} × ${s.hours||0} h × ${s.rate||0} Kč = ${kc(amount)}`);
+    });
+    const shiftsTotal = w.finance.shifts.reduce((s,x) => s + (x.people||0)*(x.hours||0)*(x.rate||0), 0);
+    lines.push(`celkem: ${kc(shiftsTotal)}`);
+    lines.push('');
   }
 
-  // Flat items
-  w.finance.flatItems.forEach(f => {
-    const rawLabel = f.label || '';
-    const sectionName = CALC_LABEL_MAP[rawLabel] || rawLabel;
-    if(rawLabel.toLowerCase().includes('catering')){
-      parts.push('Catering\n\nfinální kalkulace Vám byla zaslána paní Válkovou');
-    } else {
-      const amtStr = (f.amount !== null && f.amount !== undefined) ? kc(f.amount) : '[částka]';
-      parts.push(`${sectionName}\n\n${amtStr}`);
-    }
-  });
+  w.finance.flatItems.forEach(f => lines.push(flatItemLine(f)));
 
-  parts.push(`Hezký den,\n${settings.signature}`);
-  return parts.join('\n\n');
+  lines.push('');
+  lines.push(`Hezký den,\n${settings.signature}`);
+  return lines.join('\n');
 }
 
 function buildThankYouEmailBody(w){
