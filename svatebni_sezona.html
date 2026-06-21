@@ -1097,8 +1097,13 @@ async function onAction(e){
     return;
   }
   if(action === 'fin-quickadd'){
+    const label = e.currentTarget.getAttribute('data-label');
     const amt = e.currentTarget.getAttribute('data-amount');
-    w.finance.flatItems.push({ label: e.currentTarget.getAttribute('data-label'), amount: amt ? Number(amt) : null });
+    let amount = amt ? Number(amt) : null;
+    if(label.toLowerCase().includes('doplatek nájem') && w.rentBalance !== null && w.rentBalance !== undefined){
+      amount = w.rentBalance;
+    }
+    w.finance.flatItems.push({ label, amount });
     persist(); render();
     return;
   }
