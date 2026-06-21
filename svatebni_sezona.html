@@ -279,27 +279,27 @@ function migrate(w){
 
 async function load(){
   try{
-    const res = await window.storage.get(STORAGE_KEY, false);
-    weddings = res && res.value ? JSON.parse(res.value).map(migrate) : [];
+    const raw = localStorage.getItem(STORAGE_KEY);
+    weddings = raw ? JSON.parse(raw).map(migrate) : [];
   }catch(e){
     weddings = [];
   }
   if(weddings.length === 0) importSeedWeddings();
   try{
-    const res2 = await window.storage.get(SETTINGS_KEY, false);
-    if(res2 && res2.value) settings = { ...settings, ...JSON.parse(res2.value) };
+    const raw2 = localStorage.getItem(SETTINGS_KEY);
+    if(raw2) settings = { ...settings, ...JSON.parse(raw2) };
   }catch(e){}
   initGis();
   render();
 }
 
 async function persist(){
-  try{ await window.storage.set(STORAGE_KEY, JSON.stringify(weddings), false); }
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(weddings)); }
   catch(e){ console.error('Uložení se nezdařilo', e); }
 }
 
 async function persistSettings(){
-  try{ await window.storage.set(SETTINGS_KEY, JSON.stringify(settings), false); }
+  try{ localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); }
   catch(e){ console.error('Uložení nastavení se nezdařilo', e); }
 }
 
