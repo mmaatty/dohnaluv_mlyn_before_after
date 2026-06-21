@@ -304,10 +304,10 @@ function freshWedding(coupleName, date){
 }
 
 const AUTOMATIONS = [
-  { key:'auto_guestbook',     offsetDays:-60, label:'Kniha hostů',           emailType:'guestbook' },
-  { key:'auto_calculation',   offsetDays:-14, label:'Předběžná kalkulace',    emailType:'calculation' },
-  { key:'auto_final_invoice', offsetDays:1,   label:'Finální vyúčtování',     emailType:'final_invoice' },
-  { key:'auto_thank_you',     offsetDays:7,   label:'Děkovný e-mail',         emailType:'thank_you' },
+  { key:'auto_guestbook',     offsetDays:-60, label:'Kniha hostů',           emailType:'guestbook',      itemKey:'guestbook' },
+  { key:'auto_calculation',   offsetDays:-14, label:'Předběžná kalkulace',    emailType:'calculation',    itemKey:'calculation' },
+  { key:'auto_final_invoice', offsetDays:1,   label:'Finální vyúčtování',     emailType:'final_invoice',  itemKey:'pay_final_invoice' },
+  { key:'auto_thank_you',     offsetDays:7,   label:'Děkovný e-mail',         emailType:'thank_you',      itemKey:'thank_you' },
 ];
 
 function migrate(w){
@@ -1049,6 +1049,7 @@ async function onAction(e){
     try{
       await sendViaGmail(w.contactEmail, email.subject, email.body);
       w.sentAutomations[a.key] = new Date().toISOString();
+      if(a.itemKey && w.items[a.itemKey]) w.items[a.itemKey].done = true;
       await persist();
       pending.splice(idx, 1);
       if(pending.length === 0){ modal = null; render(); }
@@ -1072,6 +1073,7 @@ async function onAction(e){
       try{
         await sendViaGmail(w.contactEmail, email.subject, email.body);
         w.sentAutomations[a.key] = new Date().toISOString();
+        if(a.itemKey && w.items[a.itemKey]) w.items[a.itemKey].done = true;
       }catch(err){ errors.push(`${w.coupleName} / ${a.label}: ${err.message}`); }
     }
     await persist();
