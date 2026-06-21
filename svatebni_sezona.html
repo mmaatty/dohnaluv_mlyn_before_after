@@ -81,21 +81,18 @@ label{font-size:11px;color:var(--paper-dim);display:block;margin-bottom:4px;text
 .tab{padding:8px 4px;font-size:13px;color:var(--paper-dim);cursor:pointer;border-bottom:2px solid transparent;margin-right:18px;}
 .tab.active{color:var(--paper);border-bottom-color:var(--wheat);}
 
-.phase{margin-bottom:18px;}
-.phase-title{font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--wheat-dim);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--line);}
-.item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);}
+.phase{margin-bottom:12px;}
+.phase-title{font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--wheat-dim);margin-bottom:4px;padding-bottom:4px;border-bottom:1px solid var(--line);}
+.item{display:grid;grid-template-columns:20px 1fr auto;gap:10px;padding:7px 0;border-bottom:1px solid var(--line);align-items:center;}
 .item:last-child{border-bottom:none;}
-.checkbox{width:20px;height:20px;border-radius:5px;border:1.5px solid var(--paper-dim);flex-shrink:0;margin-top:1px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;}
+.checkbox{width:18px;height:18px;border-radius:4px;border:1.5px solid var(--paper-dim);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;}
 .checkbox.checked{background:var(--green);border-color:var(--green);color:#1b2614;}
-.item-body{flex:1;}
-.item-label{font-size:14px;}
+.item-body{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.item-label{font-size:13px;}
 .item-label.checked{color:var(--paper-dim);text-decoration:line-through;}
-.item-detail{font-size:12px;color:var(--paper-dim);margin-top:3px;}
-.item-link{font-size:12px;color:var(--water);text-decoration:none;display:inline-block;margin-top:5px;}
+.item-link{font-size:12px;color:var(--water);text-decoration:none;}
 .item-link:hover{text-decoration:underline;}
-.item-due{font-size:11px;margin-top:4px;}
-.item-note{margin-top:7px;}
-.item-note input{font-size:12px;padding:6px 8px;}
+.item-actions{display:flex;align-items:center;gap:6px;flex-shrink:0;}
 
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
 .chip{background:var(--panel-2);border:1px solid var(--line);border-radius:20px;padding:4px 10px;font-size:12px;display:flex;align-items:center;gap:6px;}
@@ -729,79 +726,41 @@ function renderChecklistTab(w){
   return TEMPLATE.map(phase => {
     const itemsHtml = phase.items.map(item => {
       const state = w.items[item.key];
-      const status = itemStatus(w, item);
-      const badgeClass = status === 'late' ? 'late' : status === 'soon' ? 'soon' : status === 'done' ? 'done' : 'neutral';
-      const finalInvoiceBlock = item.emailType === 'final_invoice' ? (() => {
-        const body = buildFinalInvoiceEmailBody(w);
-        const subject = `Finální vyúčtování — ${w.coupleName}`;
+      const finalInvoiceBtn = item.emailType === 'final_invoice' ? (() => {
         const canSend = !!w.contactEmail;
-        const mailHref = canSend
-          ? `mailto:${encodeURIComponent(w.contactEmail)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
-          : '';
-        return `
-        <div class="send-row" style="margin-top:6px;">
-          ${canSend && gmailConnected()
-            ? `<button class="small" data-action="send-gmail-final-invoice">Odeslat přes Gmail</button>`
-            : `<button class="small" disabled>Odeslat přes Gmail</button><span class="note-small" style="margin:0;">${!w.contactEmail ? 'Chybí e-mail páru (záložka Info &amp; lidé)' : 'Gmail není připojen'}</span>`}
-        </div>`;
+        return canSend && gmailConnected()
+          ? `<button class="small" data-action="send-gmail-final-invoice">Gmail ↗</button>`
+          : `<button class="small" disabled title="${!w.contactEmail ? 'Chybí e-mail páru' : 'Gmail není připojen'}">Gmail ↗</button>`;
       })() : '';
-      const thankYouEmailBlock = item.emailType === 'thank_you' ? (() => {
-        const body = buildThankYouEmailBody(w);
-        const subject = `Děkujeme za vaši svatbu na Dohnalově mlýně`;
+      const thankYouEmailBtn = item.emailType === 'thank_you' ? (() => {
         const canSend = !!w.contactEmail;
-        const mailHref = canSend
-          ? `mailto:${encodeURIComponent(w.contactEmail)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
-          : '';
-        return `
-        <div class="send-row" style="margin-top:6px;">
-          ${canSend && gmailConnected()
-            ? `<button class="small" data-action="send-gmail-thank-you">Odeslat přes Gmail</button>`
-            : `<button class="small" disabled>Odeslat přes Gmail</button><span class="note-small" style="margin:0;">${!w.contactEmail ? 'Chybí e-mail páru (záložka Info &amp; lidé)' : 'Gmail není připojen'}</span>`}
-        </div>`;
+        return canSend && gmailConnected()
+          ? `<button class="small" data-action="send-gmail-thank-you">Gmail ↗</button>`
+          : `<button class="small" disabled title="${!w.contactEmail ? 'Chybí e-mail páru' : 'Gmail není připojen'}">Gmail ↗</button>`;
       })() : '';
-      const calcEmailBlock = item.emailType === 'calculation' ? (() => {
-        const body = buildPreliminaryCalcEmailBody(w);
-        const subject = `Předběžná kalkulace — ${w.coupleName}`;
+      const calcEmailBtn = item.emailType === 'calculation' ? (() => {
         const canSend = !!w.contactEmail;
-        const mailHref = canSend
-          ? `mailto:${encodeURIComponent(w.contactEmail)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
-          : '';
-        return `
-        <div class="send-row" style="margin-top:6px;">
-          ${canSend && gmailConnected()
-            ? `<button class="small" data-action="send-gmail-calc">Odeslat přes Gmail</button>`
-            : `<button class="small" disabled>Odeslat přes Gmail</button><span class="note-small" style="margin:0;">${!w.contactEmail ? 'Chybí e-mail páru (záložka Info &amp; lidé)' : 'Gmail není připojen'}</span>`}
-        </div>`;
+        return canSend && gmailConnected()
+          ? `<button class="small" data-action="send-gmail-calc">Gmail ↗</button>`
+          : `<button class="small" disabled title="${!w.contactEmail ? 'Chybí e-mail páru' : 'Gmail není připojen'}">Gmail ↗</button>`;
       })() : '';
-      const emailBlock = item.email ? (() => {
+      const guestbookBlock = item.email ? (() => {
         const canSend = w.contactEmail && w.guestbookLink;
-        const vars = { coupleName: w.coupleName, link: w.guestbookLink, signature: settings.signature };
-        const mailHref = canSend
-          ? `mailto:${encodeURIComponent(w.contactEmail)}?subject=${encodeURIComponent(fillTemplate(item.email.subject, vars))}&body=${encodeURIComponent(fillTemplate(item.email.body, vars))}`
-          : '';
-        return `
-        <div class="item-note">
-          <label style="margin-top:8px;">Konkrétní odkaz pro tuto svatbu</label>
-          <input type="text" placeholder="https://docs.google.com/..." value="${escapeHtml(w.guestbookLink)}" data-action="bind-guestbook-link" data-key="${item.key}"/>
-        </div>
-        <div class="send-row" style="margin-top:6px;">
+        return `<input type="text" placeholder="Odkaz na knihu hostů…" value="${escapeHtml(w.guestbookLink)}" data-action="bind-guestbook-link" data-key="${item.key}" style="font-size:11px;padding:4px 7px;width:260px;"/>
           ${canSend && gmailConnected()
-            ? `<button class="small" data-action="send-gmail-item" data-key="${item.key}">Odeslat přes Gmail</button>`
-            : `<button class="small" disabled>Odeslat přes Gmail</button><span class="note-small" style="margin:0;">${!w.contactEmail ? 'Chybí e-mail páru (záložka Info &amp; lidé)' : !w.guestbookLink ? 'Chybí konkrétní odkaz' : 'Gmail není připojen'}</span>`}
-        </div>`;
+            ? `<button class="small" data-action="send-gmail-item" data-key="${item.key}">Gmail ↗</button>`
+            : `<button class="small" disabled title="${!w.contactEmail ? 'Chybí e-mail páru' : !w.guestbookLink ? 'Chybí odkaz' : 'Gmail není připojen'}">Gmail ↗</button>`}`;
       })() : '';
+      const actionBtn = finalInvoiceBtn || calcEmailBtn || thankYouEmailBtn;
       return `
       <div class="item">
         <div class="checkbox ${state.done ? 'checked':''}" data-action="toggle-item" data-key="${item.key}">${state.done ? '✓' : ''}</div>
         <div class="item-body">
-          <div class="item-label ${state.done?'checked':''}">${escapeHtml(item.label)}</div>
+          <span class="item-label ${state.done?'checked':''}">${escapeHtml(item.label)}</span>
           ${item.link ? `<a class="item-link" href="${item.link}" target="_blank" rel="noopener">${escapeHtml(item.linkLabel || 'Odkaz')} ↗</a>` : ''}
-          ${item.qrImg ? `<div style="margin-top:6px;"><button class="small" data-action="show-qr" data-img="${escapeHtml(item.qrImg)}" data-label="${escapeHtml(item.label)}">Zobrazit QR</button></div>` : ''}
-          ${finalInvoiceBlock}
-          ${calcEmailBlock}
-          ${thankYouEmailBlock}
-          ${emailBlock}
+          ${guestbookBlock}
         </div>
+        <div class="item-actions">${actionBtn}</div>
       </div>`;
     }).join('');
     return `<div class="phase"><div class="phase-title">${escapeHtml(phase.phase)}</div>${itemsHtml}</div>`;
