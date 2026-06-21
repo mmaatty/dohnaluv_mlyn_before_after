@@ -177,13 +177,13 @@ const COORDINATORS = ['', 'Honza + Verča', 'Matěj', 'Grochy', 'Eliška a Vojta
 
 const TEMPLATE = [
   { phase: 'Před svatbou', items: [
-    { key:'guestbook', label:'Odeslat odkaz na knihu hostů', offset:-7, hasNote:true,
+    { key:'guestbook', label:'Odeslat odkaz na knihu hostů', offset:-60, hasNote:true,
       link:'https://docs.google.com/spreadsheets/d/1v64izE_OHMODxrOPPFsD-QrYPIxD6YIYhuyXJpxr3sQ/copy', linkLabel:'Šablona knihy hostů',
       email:{
         subject:'Kniha hostů – {coupleName}',
         body:'Dobrý den,\n\nníže posíláme knihu hostů, prosíme vás o včasné vyplnění.\n\n{link}\n\nHezký den,\n{signature}'
       } },
-    { key:'calculation', label:'Zaslat předběžnou kalkulaci za služby', offset:-7, hasNote:true, emailType:'calculation' },
+    { key:'calculation', label:'Zaslat předběžnou kalkulaci za služby', offset:-14, hasNote:true, emailType:'calculation' },
   ]},
   { phase: 'Platby po svatbě', items: [
     { key:'pay_final_invoice', label:'Pošli finální vyúčtování', offset:1, hasNote:true, emailType:'final_invoice' },
@@ -196,7 +196,7 @@ const TEMPLATE = [
     { key:'pay_staff', label:'Úhrada obsluhy', offset:1, hasNote:true },
   ]},
   { phase: 'Závěr', items: [
-    { key:'thank_you', label:'Zaslat děkovný e-mail + dotazník zpětné vazby + žádost o fotky a Google recenzi', offset:2, emailType:'thank_you' },
+    { key:'thank_you', label:'Zaslat děkovný e-mail + dotazník zpětné vazby + žádost o fotky a Google recenzi', offset:7, emailType:'thank_you' },
   ]},
 ];
 
@@ -490,7 +490,7 @@ async function sendViaGmail(to, subject, bodyText){
 
 function dateOnly(d){ const x = new Date(d); x.setHours(0,0,0,0); return x; }
 function addDays(date, days){ const d = new Date(date); d.setDate(d.getDate()+days); return d; }
-function fmt(d){ return d.toLocaleDateString('cs-CZ',{day:'numeric',month:'numeric',year:'numeric'}); }
+function fmt(d){ const dd=String(d.getDate()).padStart(2,'0'),mm=String(d.getMonth()+1).padStart(2,'0'),yyyy=d.getFullYear(); return `${dd}-${mm}-${yyyy}`; }
 function todayMid(){ return dateOnly(new Date()); }
 function kc(n){ return (n||0).toLocaleString('cs-CZ') + ' Kč'; }
 
@@ -819,7 +819,7 @@ function renderChecklistTab(w){
       const AUTO_KEY_MAP = { 'guestbook': 'auto_guestbook', 'calculation': 'auto_calculation', 'final_invoice': 'auto_final_invoice', 'thank_you': 'auto_thank_you' };
       const autoKey = item.emailType ? AUTO_KEY_MAP[item.emailType] : (item.email ? 'auto_guestbook' : null);
       const sentTs = autoKey && w.sentAutomations && w.sentAutomations[autoKey]
-        ? `<span style="font-size:10px;color:var(--green);margin-left:8px;">✓ odesláno ${new Date(w.sentAutomations[autoKey]).toLocaleDateString('cs-CZ')}</span>`
+        ? `<span style="font-size:10px;color:var(--green);margin-left:8px;">✓ odesláno ${fmt(new Date(w.sentAutomations[autoKey]))}</span>`
         : '';
       const actionBtn = finalInvoiceBtn || calcEmailBtn || thankYouEmailBtn;
       return `
