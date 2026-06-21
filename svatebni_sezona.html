@@ -830,7 +830,7 @@ function renderChecklistTab(w){
           <span class="item-label ${state.done?'checked':''}">${escapeHtml(item.label)}</span>${sentTs}
           ${item.link ? `<a class="item-link" href="${item.link}" target="_blank" rel="noopener">${escapeHtml(item.linkLabel || 'Odkaz')} ↗</a>` : ''}
           ${guestbookBlock}
-          ${item.qrImg ? `<a class="item-link" href="${escapeHtml(item.qrImg)}" target="_blank" rel="noopener">QR platba ↗</a>` : ''}
+          ${item.qrImg ? `<div style="margin-top:6px;"><button class="small" data-action="show-qr" data-img="${escapeHtml(item.qrImg)}" data-label="${escapeHtml(item.label)}">Zobrazit QR</button></div>` : ''}
         </div>
         <div class="item-actions">${actionBtn}</div>
       </div>`;
