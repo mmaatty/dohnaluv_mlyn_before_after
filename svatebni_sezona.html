@@ -789,57 +789,73 @@ function renderInfoTab(w){
 }
 
 function renderChecklistTab(w){
-  return TEMPLATE.map(phase => {
-    const itemsHtml = phase.items.map(item => {
-      const state = w.items[item.key];
-      const finalInvoiceBtn = item.emailType === 'final_invoice' ? (() => {
-        const canSend = !!w.contactEmail;
-        return canSend && gmailConnected()
-          ? `<button class="small" data-action="send-gmail-final-invoice">Gmail ↗</button>`
-          : `<button class="small" disabled title="${!w.contactEmail ? 'Chybí e-mail páru' : 'Gmail není připojen'}">Gmail ↗</button>`;
-      })() : '';
-      const thankYouEmailBtn = item.emailType === 'thank_you' ? (() => {
-        const canSend = !!w.contactEmail;
-        return canSend && gmailConnected()
-          ? `<button class="small" data-action="send-gmail-thank-you">Gmail ↗</button>`
-          : `<button class="small" disabled title="${!w.contactEmail ? 'Chybí e-mail páru' : 'Gmail není připojen'}">Gmail ↗</button>`;
-      })() : '';
-      const calcEmailBtn = item.emailType === 'calculation' ? (() => {
-        const canSend = !!w.contactEmail;
-        return canSend && gmailConnected()
-          ? `<button class="small" data-action="send-gmail-calc">Gmail ↗</button>`
-          : `<button class="small" disabled title="${!w.contactEmail ? 'Chybí e-mail páru' : 'Gmail není připojen'}">Gmail ↗</button>`;
-      })() : '';
-      const guestbookBlock = item.email ? (() => {
-        const canSend = w.contactEmail && w.guestbookLink;
-        return `<input type="text" placeholder="Odkaz na knihu hostů…" value="${escapeHtml(w.guestbookLink)}" data-action="bind-guestbook-link" data-key="${item.key}" style="font-size:11px;padding:4px 7px;width:260px;"/>
-          ${canSend && gmailConnected()
-            ? `<button class="small" data-action="send-gmail-item" data-key="${item.key}">Gmail ↗</button>`
-            : `<button class="small" disabled title="${!w.contactEmail ? 'Chybí e-mail páru' : !w.guestbookLink ? 'Chybí odkaz' : 'Gmail není připojen'}">Gmail ↗</button>`}`;
-      })() : '';
-      const AUTO_KEY_MAP = { 'guestbook': 'auto_guestbook', 'calculation': 'auto_calculation', 'final_invoice': 'auto_final_invoice', 'thank_you': 'auto_thank_you' };
-      const autoKey = item.emailType ? AUTO_KEY_MAP[item.emailType] : (item.email ? 'auto_guestbook' : null);
-      const sentTs = autoKey && w.sentAutomations && w.sentAutomations[autoKey]
-        ? `<span style="display:inline-flex;align-items:center;gap:5px;background:var(--green);color:#1b2614;font-size:11px;font-weight:600;padding:2px 9px;border-radius:20px;margin-left:8px;">✓ odesláno ${fmt(new Date(w.sentAutomations[autoKey]))}</span>`
-        : '';
-      const actionBtn = finalInvoiceBtn || calcEmailBtn || thankYouEmailBtn;
-      return `
-      <div class="item">
-        <div class="checkbox ${state.done ? 'checked':''}" data-action="toggle-item" data-key="${item.key}">${state.done ? '✓' : ''}</div>
-        <div class="item-body">
-          <div class="item-body-row">
-            <span class="item-label ${state.done?'checked':''}">${escapeHtml(item.label)}</span>${sentTs}
-            ${item.link ? `<a class="item-link" href="${item.link}" target="_blank" rel="noopener">${escapeHtml(item.linkLabel || 'Odkaz')} ↗</a>` : ''}
-            ${item.qrImg ? `<button class="item-link" style="cursor:pointer;background:none;border:none;padding:0;font:inherit;" data-action="show-qr" data-img="${escapeHtml(item.qrImg)}" data-label="${escapeHtml(item.label)}">QR platba ↗</button>` : ''}
-          </div>
-          ${(item.emailType || item.email) ? `<div style="font-size:11px;color:var(--paper-dim);">Termín: ${fmt(itemDueDate(w, item))}</div>` : ''}
-          ${guestbookBlock}
-        </div>
-        <div class="item-actions">${actionBtn}</div>
-      </div>`;
-    }).join('');
-    return itemsHtml;
-  }).join('');
+  const AUTO_KEY_MAP = { 'guestbook': 'auto_guestbook', 'calculation': 'auto_calculation', 'final_invoice': 'auto_final_invoice', 'thank_you': 'auto_thank_you' };
+  const allItems = TEMPLATE.flatMap(p => p.items);
+
+  function renderItem(item){
+    const state = w.items[item.key];
+    const isEmail = !!(item.emailType || item.email);
+    const autoKey = item.emailType ? AUTO_KEY_MAP[item.emailType] : (item.email ? 'auto_guestbook' : null);
+    const sentTs = autoKey && w.sentAutomations && w.sentAutomations[autoKey]
+      ? `<div style="display:inline-flex;align-items:center;gap:5px;background:var(--green);color:#1b2614;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;margin-top:3px;">✓ odesláno ${fmt(new Date(w.sentAutomations[autoKey]))}</div>`
+      : '';
+
+    let gmailBtn = '';
+    if(item.email){
+      const canSend = w.contactEmail && w.guestbookLink;
+      gmailBtn = canSend && gmailConnected()
+        ? `<button class="small" data-action="send-gmail-item" data-key="${item.key}">Gmail ↗</button>`
+        : `<button class="small" disabled title="${!w.contactEmail ? 'Chybí e-mail páru' : !w.guestbookLink ? 'Chybí odkaz' : 'Gmail není připojen'}">Gmail ↗</button>`;
+    } else if(item.emailType === 'calculation'){
+      const can = !!w.contactEmail;
+      gmailBtn = can && gmailConnected()
+        ? `<button class="small" data-action="send-gmail-calc">Gmail ↗</button>`
+        : `<button class="small" disabled title="${!w.contactEmail ? 'Chybí e-mail páru' : 'Gmail není připojen'}">Gmail ↗</button>`;
+    } else if(item.emailType === 'final_invoice'){
+      const can = !!w.contactEmail;
+      gmailBtn = can && gmailConnected()
+        ? `<button class="small" data-action="send-gmail-final-invoice">Gmail ↗</button>`
+        : `<button class="small" disabled title="${!w.contactEmail ? 'Chybí e-mail páru' : 'Gmail není připojen'}">Gmail ↗</button>`;
+    } else if(item.emailType === 'thank_you'){
+      const can = !!w.contactEmail;
+      gmailBtn = can && gmailConnected()
+        ? `<button class="small" data-action="send-gmail-thank-you">Gmail ↗</button>`
+        : `<button class="small" disabled title="${!w.contactEmail ? 'Chybí e-mail páru' : 'Gmail není připojen'}">Gmail ↗</button>`;
+    }
+
+    const guestbookInput = item.email
+      ? `<input type="text" placeholder="Odkaz na knihu hostů…" value="${escapeHtml(w.guestbookLink)}" data-action="bind-guestbook-link" data-key="${item.key}" style="font-size:11px;padding:3px 6px;width:100%;margin-top:4px;box-sizing:border-box;"/>`
+      : '';
+
+    const extraLink = item.link
+      ? `<a class="item-link" href="${item.link}" target="_blank" rel="noopener" style="font-size:11px;">${escapeHtml(item.linkLabel||'Odkaz')} ↗</a>`
+      : '';
+    const qrBtn = item.qrImg
+      ? `<button class="item-link" style="cursor:pointer;background:none;border:none;padding:0;font-size:11px;font:inherit;" data-action="show-qr" data-img="${escapeHtml(item.qrImg)}" data-label="${escapeHtml(item.label)}">QR platba ↗</button>`
+      : '';
+
+    const dueDate = isEmail ? `<div style="font-size:10px;color:var(--paper-dim);margin-top:2px;">Termín: ${fmt(itemDueDate(w, item))}</div>` : '';
+
+    return `
+    <div style="display:grid;grid-template-columns:18px 1fr auto;gap:8px;padding:7px 0;border-bottom:1px solid var(--line);align-items:start;">
+      <div class="checkbox ${state.done?'checked':''}" data-action="toggle-item" data-key="${item.key}" style="margin-top:2px;">${state.done?'✓':''}</div>
+      <div>
+        <div style="font-size:13px;font-weight:500;color:${state.done?'var(--paper-dim)':'var(--ink)'};${state.done?'text-decoration:line-through;':''}">${escapeHtml(item.label)}</div>
+        ${dueDate}${sentTs}${guestbookInput}${extraLink}${qrBtn}
+      </div>
+      <div style="display:flex;align-items:flex-start;padding-top:1px;">${gmailBtn}</div>
+    </div>`;
+  }
+
+  const emailItems = allItems.filter(i => i.emailType || i.email);
+  const payItems   = allItems.filter(i => !i.emailType && !i.email);
+
+  const colLabel = txt => `<div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--paper-dim);padding-bottom:4px;border-bottom:2px solid var(--line);margin-bottom:2px;">${txt}</div>`;
+
+  return `<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 32px;align-items:start;">
+    <div>${colLabel('Úhrady')}${payItems.map(renderItem).join('')}</div>
+    <div>${colLabel('E-maily')}${emailItems.map(renderItem).join('')}</div>
+  </div>`;
 }
 
 function renderFinanceTab(w){
