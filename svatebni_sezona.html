@@ -820,7 +820,7 @@ function renderChecklistTab(w){
       const AUTO_KEY_MAP = { 'guestbook': 'auto_guestbook', 'calculation': 'auto_calculation', 'final_invoice': 'auto_final_invoice', 'thank_you': 'auto_thank_you' };
       const autoKey = item.emailType ? AUTO_KEY_MAP[item.emailType] : (item.email ? 'auto_guestbook' : null);
       const sentTs = autoKey && w.sentAutomations && w.sentAutomations[autoKey]
-        ? `<span style="font-size:10px;color:var(--green);margin-left:8px;">✓ odesláno ${fmt(new Date(w.sentAutomations[autoKey]))}</span>`
+        ? `<span style="display:inline-flex;align-items:center;gap:5px;background:var(--green);color:#1b2614;font-size:11px;font-weight:600;padding:2px 9px;border-radius:20px;margin-left:8px;">✓ odesláno ${fmt(new Date(w.sentAutomations[autoKey]))}</span>`
         : '';
       const actionBtn = finalInvoiceBtn || calcEmailBtn || thankYouEmailBtn;
       return `
