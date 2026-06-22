@@ -830,7 +830,7 @@ function renderChecklistTab(w){
           <div class="item-body-row">
             <span class="item-label ${state.done?'checked':''}">${escapeHtml(item.label)}</span>${sentTs}
             ${item.link ? `<a class="item-link" href="${item.link}" target="_blank" rel="noopener">${escapeHtml(item.linkLabel || 'Odkaz')} ↗</a>` : ''}
-            ${item.qrImg ? `<a class="item-link" href="${escapeHtml(item.qrImg)}" target="_blank" rel="noopener">QR platba ↗</a>` : ''}
+            ${item.qrImg ? `<button class="item-link" style="cursor:pointer;background:none;border:none;padding:0;font:inherit;" data-action="show-qr" data-img="${escapeHtml(item.qrImg)}" data-label="${escapeHtml(item.label)}">QR platba ↗</button>` : ''}
           </div>
           ${(item.emailType || item.email) ? `<div style="font-size:11px;color:var(--paper-dim);">Termín: ${fmt(itemDueDate(w, item))}</div>` : ''}
           ${guestbookBlock}
@@ -838,7 +838,7 @@ function renderChecklistTab(w){
         <div class="item-actions">${actionBtn}</div>
       </div>`;
     }).join('');
-    return `<div class="phase"><div class="phase-title">${escapeHtml(phase.phase)}</div>${itemsHtml}</div>`;
+    return itemsHtml;
   }).join('');
 }
 
