@@ -360,12 +360,15 @@ function collectPendingAutomations(){
 function showAutomationPrompt(pending){
   if(!pending.length) return;
   const rows = pending.map((p, idx) => `
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);">
-      <div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);gap:8px;">
+      <div style="flex:1;min-width:0;">
         <div style="font-size:13px;font-weight:500;">${escapeHtml(p.w.coupleName)}</div>
         <div style="font-size:11px;color:var(--paper-dim);">${escapeHtml(p.a.label)} · ${escapeHtml(p.w.contactEmail)}</div>
       </div>
-      <button class="small" data-action="auto-send-one" data-idx="${idx}">Odeslat</button>
+      <div style="display:flex;gap:6px;flex-shrink:0;">
+        <button class="small ghost" data-action="auto-dismiss-one" data-idx="${idx}" title="Označit jako manuálně vyřízeno">✓ Vyřízeno</button>
+        <button class="small" data-action="auto-send-one" data-idx="${idx}">Odeslat</button>
+      </div>
     </div>`).join('');
   modal = { pending, html: `
     <div class="modal-bg" data-action="modal-bg">
@@ -1059,6 +1062,22 @@ async function onAction(e){
   }
   if(action === 'modal-cancel'){ modal = null; render(); return; }
 
+  if(action === 'auto-dismiss-one'){
+    const idx = Number(e.currentTarget.getAttribute('data-idx'));
+    const pending = modal.pending;
+    if(!pending || !pending[idx]) return;
+    const { w, a } = pending[idx];
+    w.sentAutomations[a.key] = new Date().toISOString();
+    if(a.itemKey && w.items[a.itemKey]){
+      w.items[a.itemKey].done = true;
+      w.items[a.itemKey].doneAt = Date.now();
+    }
+    await persist();
+    pending.splice(idx, 1);
+    if(pending.length) showAutomationPrompt(pending);
+    else { modal = null; render(); }
+    return;
+  }
   if(action === 'auto-send-one'){
     const idx = Number(e.currentTarget.getAttribute('data-idx'));
     const pending = modal.pending;
