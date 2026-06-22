@@ -647,23 +647,30 @@ function buildMessageText(w){
 
 function wheelSvg(pct, size){
   size = size || 56;
-  const r = size/2 - 6, c = size/2;
+  const sw = Math.max(4, size*0.13);
+  const r = size/2 - sw/2 - 1, c = size/2;
   const circumference = 2*Math.PI*r;
   const offset = circumference * (1 - pct/100);
+  const done = pct >= 100;
+  const arc = done ? '#16a34a' : '#4f46e5';
   let spokeLines = '';
   for(let k=0;k<8;k++){
     const a = (k/8) * Math.PI*2;
-    const x1 = c + Math.cos(a)*(r-9), y1 = c + Math.sin(a)*(r-9);
-    const x2 = c + Math.cos(a)*r, y2 = c + Math.sin(a)*r;
-    spokeLines += `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="#463c34" stroke-width="2"/>`;
+    const x1 = c + Math.cos(a)*(r-sw-2), y1 = c + Math.sin(a)*(r-sw-2);
+    const x2 = c + Math.cos(a)*(r-sw/2), y2 = c + Math.sin(a)*(r-sw/2);
+    spokeLines += `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="#e5e7eb" stroke-width="1.5"/>`;
   }
+  const fs = (size*0.30).toFixed(1);
+  const label = size >= 40
+    ? `<text x="${c}" y="${c}" text-anchor="middle" dominant-baseline="central" font-family="Inter,sans-serif" font-weight="700" font-size="${fs}" fill="${arc}">${Math.round(pct)}%</text>`
+    : `<circle cx="${c}" cy="${c}" r="${(size*0.06).toFixed(1)}" fill="${arc}"/>`;
   return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
-    <circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="#332c27" stroke-width="5"/>
+    <circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="#e5e7eb" stroke-width="${sw}"/>
     ${spokeLines}
-    <circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="#6fa3bd" stroke-width="5"
+    <circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="${arc}" stroke-width="${sw}"
       stroke-dasharray="${circumference.toFixed(1)}" stroke-dashoffset="${offset.toFixed(1)}"
       stroke-linecap="round" transform="rotate(-90 ${c} ${c})"/>
-    <circle cx="${c}" cy="${c}" r="3" fill="#d6a541"/></svg>`;
+    ${label}</svg>`;
 }
 
 function escapeHtml(s){
