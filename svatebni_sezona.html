@@ -798,7 +798,9 @@ function renderChecklistTab(w){
     const autoKey = item.emailType ? AUTO_KEY_MAP[item.emailType] : (item.email ? 'auto_guestbook' : null);
     const sentTs = autoKey && w.sentAutomations && w.sentAutomations[autoKey]
       ? `<div style="display:inline-flex;align-items:center;gap:5px;background:var(--green);color:#1b2614;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;margin-top:3px;">✓ odesláno ${fmt(new Date(w.sentAutomations[autoKey]))}</div>`
-      : '';
+      : (state.done && state.doneAt
+        ? `<div style="display:inline-flex;align-items:center;gap:5px;background:var(--panel-2);color:var(--paper-dim);font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;margin-top:3px;">✓ splněno ${fmt(new Date(state.doneAt))}</div>`
+        : '');
 
     let gmailBtn = '';
     if(item.email){
@@ -1169,6 +1171,7 @@ async function onAction(e){
     if(!w) return;
     const key = e.currentTarget.getAttribute('data-key');
     w.items[key].done = !w.items[key].done;
+    w.items[key].doneAt = w.items[key].done ? Date.now() : null;
     persist(); render();
     return;
   }
