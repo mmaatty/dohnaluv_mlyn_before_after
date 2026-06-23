@@ -303,6 +303,7 @@ function freshWedding(coupleName, date){
     guestbookLink:'https://docs.google.com/spreadsheets/d/1Ng7E5D-lPNaWM0huODMUh5BwvNTYbZYCHjyGEUILa74/edit?gid=0#gid=0',
     items: freshItemsState(),
     finance: { shifts:[], flatItems:[], note:'' },
+    cleaning: { staffPlanned:null, startTime:'', note:'' },
   };
 }
 
@@ -327,6 +328,8 @@ function migrate(w){
   if(!w.finance || typeof w.finance !== 'object') w.finance = { shifts:[], flatItems:[], note:'' };
   if(!Array.isArray(w.finance.shifts)) w.finance.shifts = [];
   if(w.finance.note === undefined) w.finance.note = '';
+  if(!w.cleaning || typeof w.cleaning !== 'object') w.cleaning = { staffPlanned:null, startTime:'', note:'' };
+  if(w.cleaning.note === undefined) w.cleaning.note = '';
   if(!Array.isArray(w.finance.flatItems)) w.finance.flatItems = [];
   if(!w.sentAutomations) w.sentAutomations = {};
   if(!w.items || typeof w.items !== 'object') w.items = freshItemsState();
@@ -932,15 +935,57 @@ function renderFinanceTab(w){
   `;
 }
 
+function buildCleaningMessageText(w){
+  const cleanDate = new Date(w.date);
+  cleanDate.setDate(cleanDate.getDate() + 1);
+  const dateFmt = fmt(cleanDate);
+  const time = w.cleaning.startTime || '—';
+  return `Ahoj, úklid ${dateFmt}, možnost začátku ${time}, na auto se domluvte sami.\n\nDíky moc.\nMatěj`;
+}
+
+function renderCleaningTab(w){
+  const cleanDate = new Date(w.date);
+  cleanDate.setDate(cleanDate.getDate() + 1);
+  const dateFmt = cleanDate.toISOString().slice(0,10);
+  const msg = buildCleaningMessageText(w);
+  return `
+    <div class="card">
+      <div class="section-title">Úklid</div>
+      <div class="row3">
+        <div class="field"><label>Počet lidí</label>
+          <input type="number" min="0" id="cleaning-staff" value="${w.cleaning.staffPlanned ?? ''}" placeholder="počet"/>
+        </div>
+        <div class="field"><label>Datum úklidu</label>
+          <input type="date" id="cleaning-date" value="${dateFmt}" readonly style="opacity:0.6;cursor:default;"/>
+        </div>
+        <div class="field"><label>Začátek (čas)</label>
+          <input type="time" id="cleaning-time" value="${w.cleaning.startTime || ''}"/>
+        </div>
+      </div>
+      <div class="field" style="margin-top:4px;"><label>Poznámka</label>
+        <textarea id="cleaning-note" placeholder="Volná poznámka…" style="min-height:60px;resize:vertical;">${escapeHtml(w.cleaning.note || '')}</textarea>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-title">Zpráva pro úklid</div>
+      <textarea id="cleaning-msg-preview" readonly style="min-height:120px;font-family:'JetBrains Mono',monospace;font-size:12px;white-space:pre-wrap;resize:vertical;">${escapeHtml(msg)}</textarea>
+      <div class="send-row">
+        <button data-action="copy-cleaning-message">Kopírovat text</button>
+      </div>
+    </div>
+  `;
+}
+
 function renderDetail(){
   const w = weddings.find(x => x.id === view.weddingId);
   if(!w){ view.mode = 'list'; return renderList(); }
   const prog = weddingProgress(w);
-  const tabs = [['info','Info & lidé'],['checklist','Checklist'],['finance','Finance']];
+  const tabs = [['info','Info & lidé'],['checklist','Checklist'],['finance','Finance'],['cleaning','Úklid']];
   const tabsHtml = tabs.map(([key,label]) => `<div class="tab ${view.tab===key?'active':''}" data-action="set-tab" data-tab="${key}">${label}</div>`).join('');
   let tabBody = '';
   if(view.tab === 'checklist') tabBody = renderChecklistTab(w);
   else if(view.tab === 'info') tabBody = renderInfoTab(w);
+  else if(view.tab === 'cleaning') tabBody = renderCleaningTab(w);
   else tabBody = renderFinanceTab(w);
 
   return `
@@ -993,6 +1038,15 @@ function attachEvents(){
     const w = weddings.find(x => x.id === view.weddingId);
     if(w) finNoteEl.addEventListener('change', e => { w.finance.note = e.target.value; persist(); });
   }
+  const clW = weddings.find(x => x.id === view.weddingId);
+  const clStaff = document.getElementById('cleaning-staff');
+  if(clStaff && clW) clStaff.addEventListener('change', e => { clW.cleaning.staffPlanned = e.target.value ? Number(e.target.value) : null; persist(); });
+  const clTime = document.getElementById('cleaning-time');
+  if(clTime && clW) clTime.addEventListener('change', e => { clW.cleaning.startTime = e.target.value; persist(); const ta = document.getElementById('cleaning-msg-preview'); if(ta) ta.value = buildCleaningMessageText(clW); });
+  const clNote = document.getElementById('cleaning-note');
+  if(clNote && clW) clNote.addEventListener('change', e => { clW.cleaning.note = e.target.value; persist(); });
+  const clCopy = document.querySelector('[data-action="copy-cleaning-message"]');
+  if(clCopy) clCopy.addEventListener('click', () => { const ta = document.getElementById('cleaning-msg-preview'); if(ta){ ta.select(); try{ document.execCommand('copy'); }catch(e){} } });
   const sigEl = document.getElementById('signature-input');
   if(sigEl) sigEl.addEventListener('change', e => { settings.signature = e.target.value; persistSettings(); });
   const clientIdEl = document.getElementById('google-clientid-input');
