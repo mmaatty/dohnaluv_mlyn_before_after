@@ -302,7 +302,7 @@ function freshWedding(coupleName, date){
     rentDeposit:null, rentBalance:null,
     guestbookLink:'https://docs.google.com/spreadsheets/d/1Ng7E5D-lPNaWM0huODMUh5BwvNTYbZYCHjyGEUILa74/edit?gid=0#gid=0',
     items: freshItemsState(),
-    finance: { shifts:[], flatItems:[] },
+    finance: { shifts:[], flatItems:[], note:'' },
   };
 }
 
@@ -324,8 +324,9 @@ function migrate(w){
   if(w.rentDeposit === undefined) w.rentDeposit = null;
   if(w.rentBalance === undefined) w.rentBalance = null;
   if(w.guestbookLink === undefined) w.guestbookLink = '';
-  if(!w.finance || typeof w.finance !== 'object') w.finance = { shifts:[], flatItems:[] };
+  if(!w.finance || typeof w.finance !== 'object') w.finance = { shifts:[], flatItems:[], note:'' };
   if(!Array.isArray(w.finance.shifts)) w.finance.shifts = [];
+  if(w.finance.note === undefined) w.finance.note = '';
   if(!Array.isArray(w.finance.flatItems)) w.finance.flatItems = [];
   if(!w.sentAutomations) w.sentAutomations = {};
   if(!w.items || typeof w.items !== 'object') w.items = freshItemsState();
@@ -914,6 +915,10 @@ function renderFinanceTab(w){
       </tbody></table>
     </div>
     <div class="card">
+      <div class="section-title">Poznámka</div>
+      <textarea id="finance-note" placeholder="Volná poznámka k financím…" style="min-height:80px;resize:vertical;">${escapeHtml(w.finance.note || '')}</textarea>
+    </div>
+    <div class="card">
       <div class="section-title">Zpráva pro pár</div>
       <textarea id="msg-preview" readonly>${escapeHtml(buildMessageText(w))}</textarea>
       <div class="send-row">
@@ -931,7 +936,7 @@ function renderDetail(){
   const w = weddings.find(x => x.id === view.weddingId);
   if(!w){ view.mode = 'list'; return renderList(); }
   const prog = weddingProgress(w);
-  const tabs = [['checklist','Checklist'],['info','Info & lidé'],['finance','Finance']];
+  const tabs = [['info','Info & lidé'],['checklist','Checklist'],['finance','Finance']];
   const tabsHtml = tabs.map(([key,label]) => `<div class="tab ${view.tab===key?'active':''}" data-action="set-tab" data-tab="${key}">${label}</div>`).join('');
   let tabBody = '';
   if(view.tab === 'checklist') tabBody = renderChecklistTab(w);
@@ -983,6 +988,11 @@ function attachEvents(){
   if(filterEl) filterEl.addEventListener('change', e => { coordFilter = e.target.value; render(); });
   const upcomingEl = document.getElementById('upcoming-filter');
   if(upcomingEl) upcomingEl.addEventListener('change', e => { upcomingOnly = e.target.checked; render(); });
+  const finNoteEl = document.getElementById('finance-note');
+  if(finNoteEl){
+    const w = weddings.find(x => x.id === view.weddingId);
+    if(w) finNoteEl.addEventListener('change', e => { w.finance.note = e.target.value; persist(); });
+  }
   const sigEl = document.getElementById('signature-input');
   if(sigEl) sigEl.addEventListener('change', e => { settings.signature = e.target.value; persistSettings(); });
   const clientIdEl = document.getElementById('google-clientid-input');
