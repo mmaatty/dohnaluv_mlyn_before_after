@@ -956,7 +956,7 @@ function renderCleaningTab(w){
           <input type="number" min="0" id="cleaning-staff" value="${w.cleaning.staffPlanned ?? ''}" placeholder="počet"/>
         </div>
         <div class="field"><label>Datum úklidu</label>
-          <input type="date" id="cleaning-date" value="${dateFmt}" readonly style="opacity:0.6;cursor:default;"/>
+          <input type="text" value="${fmt(cleanDate)}" readonly style="opacity:0.6;cursor:default;"/>
         </div>
         <div class="field"><label>Začátek (čas)</label>
           <input type="time" id="cleaning-time" value="${w.cleaning.startTime || ''}"/>
